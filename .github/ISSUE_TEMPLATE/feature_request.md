@@ -11,7 +11,6 @@ assignees: ''
 
 
 **Requested by**: <!-- check AT LEAST one box -->
-- [ ] Client 
 - [ ] Development Team
 - [ ] Instructor
 
