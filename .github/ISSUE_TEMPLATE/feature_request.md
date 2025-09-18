@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Request a new feature for the DB Poultry DBMS
+about: Request a new feature for the application
 title: ""
 labels: new feature
 assignees: ''

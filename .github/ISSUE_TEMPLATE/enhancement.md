@@ -1,6 +1,6 @@
 ---
 name: Enhancement
-about: Enhance a feature for the DB Poultry DBMS
+about: Enhance a feature for the application
 title: ""
 labels: enhancement
 assignees: ''

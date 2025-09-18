@@ -8,7 +8,7 @@ release. Write RST between the following start and end comments.-->
 ## Summary of Changes
 
 
-<!-- Do not modify the lines below. These are for the reviewers (QA team)
+<!-- Do not modify the lines below. These are for the reviewers
 of your PR -->
 ## Reviewer Checklist
 - [ ] The PR title is descriptive enough
