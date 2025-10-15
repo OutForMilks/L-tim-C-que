@@ -1,27 +1,15 @@
-# Gradle files
-.gradle/
-build/
-*/build/
-
-# Local configuration
-local.properties
-
-# IDE files
-.idea/
 *.iml
-
-# Log files
-*.log
-
-# Generated files
-captures/
-.externalNativeBuild/
-.cxx/
-
-# OS-specific files
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
 .DS_Store
-Thumbs.db
-
-# Keystore files (keep them private!)
-*.jks
-*.keystore
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties

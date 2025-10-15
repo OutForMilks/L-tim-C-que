@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "L-tim-C-que"
+rootProject.name = "l_tim_c_que"
 include(":app")
  
