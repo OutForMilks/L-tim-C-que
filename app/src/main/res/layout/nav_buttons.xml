@@ -18,12 +18,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/search_item">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/home_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/home_icon"
-            android:tint="#E5AF00" />
+            android:background="@android:color/transparent"
+            app:tint="#E5AF00" />
 
         <TextView
             android:id="@+id/home_text"
@@ -47,10 +48,11 @@
         app:layout_constraintStart_toEndOf="@id/home_item"
         app:layout_constraintEnd_toStartOf="@id/recents_item">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/search_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
             android:src="@drawable/search_icon" />
 
         <TextView
@@ -74,10 +76,11 @@
         app:layout_constraintStart_toEndOf="@id/search_item"
         app:layout_constraintEnd_toStartOf="@id/bookmark_item">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/recents_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
             android:src="@drawable/recents_icon" />
 
         <TextView
@@ -102,10 +105,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_chainStyle="packed">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/bookmark_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
             android:src="@drawable/bookmark_icon" />
 
         <TextView

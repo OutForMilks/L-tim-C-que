@@ -5,5 +5,10 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
+    <style name="ShapeAppearance.App.RoundedTopCorners" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">10dp</item>  <item name="cornerSizeTopRight">10dp</item>
+    </style>
+
     <style name="Theme.L_tim_c_que" parent="Base.Theme.L_tim_c_que" />
 </resources>
