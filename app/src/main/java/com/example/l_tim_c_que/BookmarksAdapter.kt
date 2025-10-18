@@ -9,13 +9,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-class RandomFeatureAdapter(private val recipeList: ArrayList<Recipe>) :
-    RecyclerView.Adapter<RandomFeatureAdapter.RandomFeatureViewHolder>() {
+class BookmarksAdapter(private val recipeList: ArrayList<Recipe>) :
+    RecyclerView.Adapter<BookmarksAdapter.BookmarksViewHolder>() {
 
     private var onItemClickListener: ((Recipe) -> Unit)? = null
     private var onBookmarkClickListener: ((Recipe, Int) -> Unit)? = null
 
-    inner class RandomFeatureViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class BookmarksViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val recipeBanner: ImageView = itemView.findViewById(R.id.recipe_banner)
         val recipeTitle: TextView = itemView.findViewById(R.id.recipe_title)
         val recipeCategories: TextView = itemView.findViewById(R.id.recipe_categories)
@@ -47,17 +47,17 @@ class RandomFeatureAdapter(private val recipeList: ArrayList<Recipe>) :
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RandomFeatureViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookmarksViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.recipe_item, parent, false)
-        return RandomFeatureViewHolder(view)
+        return BookmarksViewHolder(view)
     }
 
     override fun getItemCount(): Int {
         return recipeList.size
     }
 
-    override fun onBindViewHolder(holder: RandomFeatureViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: BookmarksViewHolder, position: Int) {
         holder.bind(recipeList[position])
     }
 

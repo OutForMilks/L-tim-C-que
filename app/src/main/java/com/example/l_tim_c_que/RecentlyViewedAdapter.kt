@@ -12,11 +12,39 @@ import com.bumptech.glide.Glide
 class RecentlyViewedAdapter(private val recipeList: ArrayList<Recipe>) :
     RecyclerView.Adapter<RecentlyViewedAdapter.RecentlyViewedViewHolder>() {
 
+    private var onItemClickListener: ((Recipe) -> Unit)? = null
+    private var onBookmarkClickListener: ((Recipe, Int) -> Unit)? = null
+
     inner class RecentlyViewedViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val recipeBanner: ImageView = itemView.findViewById(R.id.recipe_banner)
         val recipeTitle: TextView = itemView.findViewById(R.id.recipe_title)
         val recipeCategories: TextView = itemView.findViewById(R.id.recipe_categories)
         val favIcon: ImageButton = itemView.findViewById(R.id.fav_icon)
+
+        fun bind(recipe: Recipe) {
+            recipeTitle.text = recipe.name
+            recipeCategories.text = "${recipe.category} • ${recipe.area}"
+
+            Glide.with(itemView.context)
+                .load(recipe.imageUrl)
+                .placeholder(R.drawable.chicken_mushroom_bg)
+                .centerCrop()
+                .into(recipeBanner)
+
+            if (recipe.isBookmarked) {
+                favIcon.setImageResource(R.drawable.favorite_icon_filled)
+            } else {
+                favIcon.setImageResource(R.drawable.favorite_icon)
+            }
+
+            itemView.setOnClickListener {
+                onItemClickListener?.invoke(recipe)
+            }
+
+            favIcon.setOnClickListener {
+                onBookmarkClickListener?.invoke(recipe, adapterPosition)
+            }
+        }
     }
 
 
@@ -31,26 +59,14 @@ class RecentlyViewedAdapter(private val recipeList: ArrayList<Recipe>) :
     }
 
     override fun onBindViewHolder(holder: RecentlyViewedViewHolder, position: Int) {
-        val currentRecipe = recipeList[position]
+        holder.bind(recipeList[position])
+    }
 
-        holder.recipeTitle.text = currentRecipe.name
+    fun setOnItemClickListener(listener: (Recipe) -> Unit) {
+        onItemClickListener = listener
+    }
 
-        holder.recipeCategories.text = "${currentRecipe.category} • ${currentRecipe.area}"
-
-        Glide.with(holder.itemView.context)
-            .load(currentRecipe.imageUrl)
-            .placeholder(R.drawable.chicken_mushroom_bg)
-            .centerCrop()
-            .into(holder.recipeBanner)
-
-        if (currentRecipe.isBookmarked) {
-            holder.favIcon.setImageResource(R.drawable.favorite_icon_filled)
-        } else {
-            holder.favIcon.setImageResource(R.drawable.favorite_icon)
-        }
-
-        holder.favIcon.setOnClickListener {
-            currentRecipe.isBookmarked = !currentRecipe.isBookmarked
-        }
+    fun setOnBookmarkClickListener(listener: (Recipe, Int) -> Unit) {
+        onBookmarkClickListener = listener
     }
 }

@@ -12,11 +12,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class MainActivity : AppCompatActivity() {
-
+class RecentsActivity : AppCompatActivity() {
     private lateinit var homeItem: LinearLayout
     private lateinit var searchItem: LinearLayout
     private lateinit var recentsItem: LinearLayout
@@ -35,8 +33,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        setContentView(R.layout.activity_recents)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.recents)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -57,41 +55,15 @@ class MainActivity : AppCompatActivity() {
         recentsText = findViewById(R.id.recents_text)
         bookmarksText = findViewById(R.id.bookmark_text)
 
-        updateNavColors(R.id.home_item)
+        updateNavColors(R.id.recents_item)
 
-        //recently viewed
-        val recentlyViewedData = RecipeSamples.get()
-        val recentlyViewedAdapter = RecentlyViewedAdapter(recentlyViewedData)
-        val recentlyViewedRecyclerView = findViewById<RecyclerView>(R.id.recently_viewed_recipes)
-        recentlyViewedRecyclerView.adapter = recentlyViewedAdapter
-        recentlyViewedRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        val horizontalSpacing = (18 * resources.displayMetrics.density).toInt()
-        recentlyViewedRecyclerView.addItemDecoration(HorizontalSpacingItemDecoration(horizontalSpacing))
-        recentlyViewedAdapter.setOnItemClickListener { recipe ->
-            val intent = Intent(this, RecipeDetailActivity::class.java)
-
-
-            intent.putExtra("EXTRA_RECIPE", recipe)
-
-            startActivity(intent)
-        }
-
-        recentlyViewedAdapter.setOnBookmarkClickListener { recipe, position ->
-            // database logic here
-            recipe.isBookmarked = !recipe.isBookmarked
-
-            recentlyViewedAdapter.notifyItemChanged(position)
-        }
-
-        //random feature
-        val randomFeatureData = RecipeSamples.get()
-        val randomFeatureAdapter = RandomFeatureAdapter(randomFeatureData)
-        val randomFeatureRecyclerView = findViewById<RecyclerView>(R.id.random_feature_recipes)
-        randomFeatureRecyclerView.adapter = randomFeatureAdapter
-        randomFeatureRecyclerView.layoutManager = GridLayoutManager(this, 2)
+        val recentsRecyclerView = findViewById<RecyclerView>(R.id.recents_recycler_view)
+        val recentsAdapter = RecentsAdapter(RecipeSamples.get())
+        recentsRecyclerView.adapter = recentsAdapter
+        recentsRecyclerView.layoutManager = GridLayoutManager(this, 2)
         val spacingInPixels = (22 * resources.displayMetrics.density).toInt()
-        randomFeatureRecyclerView.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, false))
-        randomFeatureAdapter.setOnItemClickListener { recipe ->
+        recentsRecyclerView.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, false))
+        recentsAdapter.setOnItemClickListener { recipe ->
             val intent = Intent(this, RecipeDetailActivity::class.java)
 
             intent.putExtra("EXTRA_RECIPE", recipe)
@@ -99,11 +71,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        randomFeatureAdapter.setOnBookmarkClickListener { recipe, position ->
+        recentsAdapter.setOnBookmarkClickListener { recipe, position ->
             // database logic here
             recipe.isBookmarked = !recipe.isBookmarked
 
-            randomFeatureAdapter.notifyItemChanged(position)
+            recentsAdapter.notifyItemChanged(position)
         }
 
         searchItem.setOnClickListener {
@@ -111,16 +83,17 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        recentsItem.setOnClickListener {
-            val intent = Intent(this, RecentsActivity::class.java)
-            startActivity(intent)
-        }
-
         bookmarksItem.setOnClickListener {
             val intent = Intent(this, BookmarksActivity::class.java)
             startActivity(intent)
         }
+
+        homeItem.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
+
     private fun updateNavColors(activeItemId: Int) {
         val activeColor = ContextCompat.getColor(this, R.color.active_yellow) // #E5AF00
         val inactiveColor = ContextCompat.getColor(this, R.color.inactive_black) // #000000
