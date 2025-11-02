@@ -2,7 +2,7 @@ package com.example.l_tim_c_que.api
 
 import com.google.gson.annotations.SerializedName
 
-object API_Response_Models {
+object APIService {
 
     data class MealListResponse(
         @SerializedName("meals")

@@ -5,29 +5,29 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 
-interface Meal_API_Service {
+interface APIModels {
 
     @GET("search.php")
     fun getMealByName(
         @Query("s") name: String
-    ): Call<API_Response_Models.MealListResponse>
+    ): Call<APIService.MealListResponse>
 
     @GET("filter.php")
     fun getMealByIngredient(
         @Query("i") ingredient: String
-    ): Call<API_Response_Models.MealListResponse>
+    ): Call<APIService.MealListResponse>
 
     @GET("filter.php")
     fun getMealByArea(
         @Query("a") area: String
-    ): Call<API_Response_Models.MealListResponse>
+    ): Call<APIService.MealListResponse>
 
     @GET("lookup.php")
     fun getMealById(
         @Query("i") id: String
-    ): Call<API_Response_Models.MealDetailResponse>
+    ): Call<APIService.MealDetailResponse>
 
     @GET("random.php")
-    fun getMealByRandom(): Call<API_Response_Models.MealDetailResponse>
+    fun getMealByRandom(): Call<APIService.MealDetailResponse>
 
 }
