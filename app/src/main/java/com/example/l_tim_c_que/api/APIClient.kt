@@ -23,12 +23,12 @@ object APIClient {
     }
 
     // Create a single Retrofit instance for the whole app (Singleton)
-    val api: APIModels by lazy {
+    val api: APIService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL) // Base URL for all API calls
             .client(client) // Use our custom client (with logging)
             .addConverterFactory(GsonConverterFactory.create()) // Converts JSON to Kotlin objects
             .build()
-            .create(APIModels::class.java) // Creates the implementation of our API interface
+            .create(APIService::class.java) // Creates the implementation of our API interface
     }
 }
