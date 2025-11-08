@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Defines how fragments connect -->
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.l_tim_c_que.ui.home.HomeFragment"
+        android:label="Home">
+
+        <action
+            android:id="@+id/action_home_to_search"
+            app:destination="@id/searchFragment">
+        </action>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.l_tim_c_que.ui.search.SearchFragment"
+        android:label="Search" >
+        <argument
+            android:name="query"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/recentFragment"
+        android:name="com.example.l_tim_c_que.ui.recent.RecentFragment"
+        android:label="Recent" />
+
+    <fragment
+        android:id="@+id/bookmarkFragment"
+        android:name="com.example.l_tim_c_que.ui.bookmark.BookmarkFragment"
+        android:label="Bookmark" />
+
+</navigation>

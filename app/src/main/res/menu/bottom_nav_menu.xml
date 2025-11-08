@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--Contents of the bottom navigation bar-->
+
+    <!--Home-->
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/home_icon"
+        android:title="Home" />
+
+    <!--Search-->
+    <item
+        android:id="@+id/searchFragment"
+        android:icon="@drawable/search_icon"
+        android:title="Search" />
+
+    <!--Recent-->
+    <item
+        android:id="@+id/recentFragment"
+        android:icon="@drawable/recents_icon"
+        android:title="Recent" />
+
+    <!--Bookmark-->
+    <item
+        android:id="@+id/bookmarkFragment"
+        android:icon="@drawable/bookmark_icon"
+        android:title="Bookmark" />
+</menu>
