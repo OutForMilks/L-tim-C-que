@@ -49,8 +49,18 @@ dependencies {
 
     //Mat component
     implementation("com.google.android.material:material:1.12.0")
-
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+
+    //Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+
+    //Lifecycle
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
+
+    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
