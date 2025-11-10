@@ -34,21 +34,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/recipe_banner" />
 
-    <TextView
-        android:id="@+id/recipe_categories"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:alpha="0.8"
-        android:fontFamily="@font/roboto"
-        android:text="Chicken • British"
-        android:textColor="#49454F"
-        android:textSize="10sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recipe_title" />
-
     <ImageButton
-        android:id="@+id/fav_icon"
+        android:id="@+id/recipie_bookmark"
         android:layout_width="22dp"
         android:layout_height="22dp"
         android:layout_marginTop="8dp"
