@@ -15,54 +15,44 @@ import com.example.l_tim_c_que.api.APIModel
 
 class MealAdapter(
     private val onClick: (APIModel.Meal) -> Unit
-) : ListAdapter<APIModel.Meal, MealViewHolder>(MealDiffCallback()) {
+) : ListAdapter<APIModel.Meal, MealAdapter.MealViewHolder>(MealDiffCallback()) {
+
+    inner class MealViewHolder(
+        itemView: View
+    ) : RecyclerView.ViewHolder(itemView) {
+        private val mealImage: ImageView = itemView.findViewById(R.id.recipe_banner)
+        private val mealName: TextView = itemView.findViewById(R.id.recipe_title)
+        private val recipieBookmark: ImageButton = itemView.findViewById(R.id.recipie_bookmark)
+        private var currentMeal: APIModel.Meal? = null
+
+        fun bind(meal : APIModel.Meal)
+        {
+            currentMeal = meal
+            mealName.text = meal.name
+            Glide.with(mealImage.context).load(meal.imageUrl).into(mealImage)
+
+            itemView.setOnClickListener {
+                onClick(meal)
+            }
+            recipieBookmark.setOnClickListener {
+                onClick(meal)
+            }
+
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MealViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.recipe_item, parent, false)
-        return MealViewHolder(view, onClick)
+        return MealViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: MealViewHolder, position: Int) {
         val meal = getItem(position)
         holder.bind(meal)
     }
-}
-
-class MealViewHolder(
-    itemView: View,
-    private val onClick: (APIModel.Meal) -> Unit
-) : RecyclerView.ViewHolder(itemView) {
-
-    private val mealImage: ImageView = itemView.findViewById(R.id.recipe_banner)
-    private val mealName: TextView = itemView.findViewById(R.id.recipe_title)
-    private val recipieBookmark: ImageButton = itemView.findViewById(R.id.recipie_bookmark)
-    private var currentMeal: APIModel.Meal? = null
 
 
-    init {
-        itemView.setOnClickListener {
-            currentMeal?.let {
-                onClick(it)
-            }
-        }
-
-        recipieBookmark.setOnClickListener {
-            currentMeal?.let {
-                onClick(it)
-            }
-        }
-    }
-
-    fun bind(meal: APIModel.Meal) {
-        currentMeal = meal
-
-        mealName.text = meal.name
-
-        Glide.with(mealImage.context)
-            .load(meal.imageUrl)
-            .into(mealImage)
-    }
 }
 
 class MealDiffCallback : DiffUtil.ItemCallback<APIModel.Meal>() {
