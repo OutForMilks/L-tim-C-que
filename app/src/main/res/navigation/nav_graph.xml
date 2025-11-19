@@ -5,7 +5,6 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/homeFragment">
 
-
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.l_tim_c_que.ui.home.HomeFragment"
@@ -25,6 +24,11 @@
         <argument
             android:name="query"
             app:argType="string" />
+        <action
+            android:id="@+id/action_search_to_detail"
+            app:destination="@id/detailFragment">
+        </action>
+
     </fragment>
 
     <fragment
@@ -36,5 +40,10 @@
         android:id="@+id/bookmarkFragment"
         android:name="com.example.l_tim_c_que.ui.bookmark.BookmarkFragment"
         android:label="Bookmark" />
+
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="com.example.l_tim_c_que.ui.detail.DetailFragment"
+        android:label="detail" />
 
 </navigation>
