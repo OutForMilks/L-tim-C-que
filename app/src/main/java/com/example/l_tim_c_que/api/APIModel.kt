@@ -116,7 +116,56 @@ object APIModel {
         val measure19: String?,
         @SerializedName("strMeasure20") // Meal Measure 20
         val measure20: String?
-    )
+    ) {
+        fun getMeasure(i: Int): String? = when(i) {
+            1 -> measure1
+            2 -> measure2
+            3 -> measure3
+            4 -> measure4
+            5 -> measure5
+            6 -> measure6
+            7 -> measure7
+            8 -> measure8
+            9 -> measure9
+            10 -> measure10
+            11 -> measure11
+            12 -> measure12
+            13 -> measure13
+            14 -> measure14
+            15 -> measure15
+            16 -> measure16
+            17 -> measure17
+            18 -> measure18
+            19 -> measure19
+            20 -> measure20
+            else -> null
+        }
+
+        fun getIngredient(i: Int): String? = when(i) {
+            1 -> ingredient1
+            2 -> ingredient2
+            3 -> ingredient3
+            4 -> ingredient4
+            5 -> ingredient5
+            6 -> ingredient6
+            7 -> ingredient7
+            8 -> ingredient8
+            9 -> ingredient9
+            10 -> ingredient10
+            11 -> ingredient11
+            12 -> ingredient12
+            13 -> ingredient13
+            14 -> ingredient14
+            15 -> ingredient15
+            16 -> ingredient16
+            17 -> ingredient17
+            18 -> ingredient18
+            19 -> ingredient19
+            20 -> ingredient20
+            else -> null
+        }
+
+    }
 
 
 }
