@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "325272688101",
+    "project_id": "letim-coque",
+    "storage_bucket": "letim-coque.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325272688101:android:6b9ccde2eed2d9e511cb0c",
+        "android_client_info": {
+          "package_name": "com.example.l_tim_c_que"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZigqxpUTYr_8NgJXlS0molbkKs7rDZP0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
