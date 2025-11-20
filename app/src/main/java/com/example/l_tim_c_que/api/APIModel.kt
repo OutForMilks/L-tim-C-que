@@ -15,7 +15,9 @@ object APIModel {
         @SerializedName("strMeal") // Meal Name
         val name: String?,
         @SerializedName("strMealThumb") // Meal image url
-        val imageUrl: String?
+        val imageUrl: String?,
+        @SerializedName("strArea") // Meal Place of Origin
+        val area: String?
     )
 
     data class MealDetailResponse(
