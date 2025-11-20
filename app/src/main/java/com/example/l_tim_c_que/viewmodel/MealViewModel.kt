@@ -83,26 +83,6 @@ class MealViewModel (
     }
 
     /**
-     * Fetches a random meal.
-     * The result is posted to the [_meals] LiveData.
-     */
-    fun searchMealByRandom() {
-        _isLoading.value = true
-        _errorMessage.value = null
-
-        viewModelScope.launch {
-            try {
-                val response = mealRepository.getMealByRandom()
-                _meals.value = response
-            } catch (e: Exception) {
-                _errorMessage.value = e.message
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    /**
      * Searches for meals by area (country).
      * The result is posted to the [_meals] LiveData.
      * @param country The country to search for meals from.
