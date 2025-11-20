@@ -57,7 +57,9 @@ class HomeFragment : Fragment() {
                 if (query.isNotEmpty()) {
 
                     searchViewModel.setSearchQuery(query)
-                    searchViewModel.setFilter("name")
+                    if(searchViewModel.filter.value == null){
+                        searchViewModel.setFilter("name")
+                    }
 
                     val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
