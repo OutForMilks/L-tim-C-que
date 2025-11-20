@@ -200,9 +200,9 @@ private fun SearchFragment.setupFilterButtons(view: View) {
     val buttons = listOf(nameBtn, originBtn, ingredientBtn)
 
     when (searchViewModel.filter.value) {
-        "name" -> nameBtn.isChecked = true
-        "origin" -> originBtn.isChecked = true
-        "ingredient" -> ingredientBtn.isChecked = true
+        "name" -> nameBtn.setBackgroundResource(R.drawable.bg_filter_selected)
+        "origin" -> originBtn.setBackgroundResource(R.drawable.bg_filter_selected)
+        "ingredient" -> ingredientBtn.setBackgroundResource(R.drawable.bg_filter_selected)
     }
 
     buttons.forEach { button ->
