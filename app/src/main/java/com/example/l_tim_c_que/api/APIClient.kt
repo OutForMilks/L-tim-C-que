@@ -5,12 +5,24 @@ import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
+/**
+ * Singleton object that manages the Retrofit API client configuration.
+ * It provides a single instance of [APIService] for making network requests.
+ */
 object APIClient {
 
-    // The base URL — all requests will be built from this root.
+    /**
+     * The base URL for the MealDB API.
+     * All requests will be built relative to this URL.
+     */
     private const val BASE_URL = "https://www.themealdb.com/api/json/v1/1/"
 
-    // Create an HTTP client with optional logging (for debugging)
+    /**
+     * Lazy-initialized OkHttpClient with logging capabilities.
+     *
+     * This client includes an [HttpLoggingInterceptor] that logs request and response body
+     * details to the console, which is useful for debugging purposes.
+     */
     private val client by lazy {
         val logging = HttpLoggingInterceptor().apply {
             // Logs full request and response details (URL, body, headers)
@@ -22,7 +34,12 @@ object APIClient {
             .build()
     }
 
-    // Create a single Retrofit instance for the whole app (Singleton)
+    /**
+     * Lazy-initialized Retrofit service instance.
+     *
+     * This property exposes the [APIService] implementation created by Retrofit.
+     * It uses the custom [client] and a [GsonConverterFactory] to parse JSON responses.
+     */
     val api: APIService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL) // Base URL for all API calls

@@ -13,10 +13,19 @@ import com.bumptech.glide.Glide
 import com.example.l_tim_c_que.R
 import com.example.l_tim_c_que.api.APIModel
 
+/**
+ * RecyclerView Adapter for displaying a list of meals.
+ * Supports efficient updates via [ListAdapter] and [DiffUtil].
+ *
+ * @property onClick Callback function to be invoked when a meal item is clicked.
+ */
 class MealAdapter(
     private val onClick: (APIModel.Meal) -> Unit
 ) : ListAdapter<APIModel.Meal, MealAdapter.MealViewHolder>(MealDiffCallback()) {
 
+    /**
+     * ViewHolder class to hold references to the views for each meal item.
+     */
     inner class MealViewHolder(
         itemView: View
     ) : RecyclerView.ViewHolder(itemView) {
@@ -27,6 +36,11 @@ class MealAdapter(
         private val recipieBookmark: ImageButton = itemView.findViewById(R.id.recipie_bookmark)
         private var currentMeal: APIModel.Meal? = null
 
+        /**
+         * Binds the meal data to the views.
+         *
+         * @param meal The meal object to display.
+         */
         fun bind(meal : APIModel.Meal)
         {
             currentMeal = meal
@@ -58,6 +72,10 @@ class MealAdapter(
 
 }
 
+/**
+ * DiffCallback for calculating the difference between two non-null items in a list.
+ * Used by [ListAdapter] to determine which items have changed.
+ */
 class MealDiffCallback : DiffUtil.ItemCallback<APIModel.Meal>() {
     override fun areItemsTheSame(oldItem: APIModel.Meal, newItem: APIModel.Meal) =
         oldItem.id == newItem.id

@@ -7,6 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.l_tim_c_que.R
 
+/**
+ * Fragment responsible for displaying the user's bookmarked meals.
+ */
 class BookmarkFragment : Fragment() {
 
     override fun onCreateView(

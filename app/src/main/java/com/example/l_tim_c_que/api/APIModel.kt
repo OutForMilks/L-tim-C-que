@@ -2,13 +2,29 @@ package com.example.l_tim_c_que.api
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * Object containing Data Classes representing the JSON response from the MealDB API.
+ */
 object APIModel {
 
+    /**
+     * Response wrapper for a list of meals.
+     *
+     * @property meals A nullable list of [Meal] objects.
+     */
     data class MealListResponse(
         @SerializedName("meals")
         val meals: List<Meal>?
     )
 
+    /**
+     * Represents a simplified meal object (e.g., from search results).
+     *
+     * @property id The unique ID of the meal.
+     * @property name The name of the meal.
+     * @property imageUrl The URL of the meal's thumbnail image.
+     * @property area The area or origin of the meal (e.g., "Italian").
+     */
     data class Meal(
         @SerializedName("idMeal")
         val id: String,
@@ -20,11 +36,30 @@ object APIModel {
         val area: String?
     )
 
+    /**
+     * Response wrapper for meal details.
+     *
+     * @property meals A nullable list of [MealDetail] objects (usually contains one item).
+     */
     data class MealDetailResponse(
         @SerializedName("meals")
         val meals: List<MealDetail>?
     )
 
+    /**
+     * Represents detailed information about a specific meal.
+     * Includes ingredients, measurements, instructions, and more.
+     *
+     * @property id The unique ID of the meal.
+     * @property name The name of the meal.
+     * @property category The category of the meal (e.g., "Seafood").
+     * @property area The area or origin of the meal.
+     * @property instructions The cooking instructions.
+     * @property imageUrl The URL of the meal's thumbnail image.
+     * @property ingredient1 Ingredient 1.
+     * @property measure1 Measure for Ingredient 1.
+     * ... (up to 20 ingredients and measures)
+     */
     data class MealDetail(
         @SerializedName("idMeal")
         val id: String,
@@ -119,6 +154,12 @@ object APIModel {
         @SerializedName("strMeasure20") // Meal Measure 20
         val measure20: String?
     ) {
+        /**
+         * Retrieves a specific measure by index (1-20).
+         *
+         * @param i The index of the measure to retrieve.
+         * @return The measure string, or null if not found or index is out of range.
+         */
         fun getMeasure(i: Int): String? = when(i) {
             1 -> measure1
             2 -> measure2
@@ -143,6 +184,12 @@ object APIModel {
             else -> null
         }
 
+        /**
+         * Retrieves a specific ingredient by index (1-20).
+         *
+         * @param i The index of the ingredient to retrieve.
+         * @return The ingredient string, or null if not found or index is out of range.
+         */
         fun getIngredient(i: Int): String? = when(i) {
             1 -> ingredient1
             2 -> ingredient2
