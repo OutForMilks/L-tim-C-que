@@ -11,11 +11,15 @@ import com.example.l_tim_c_que.api.APIClient
 import com.example.l_tim_c_que.repository.MealRepository
 import com.example.l_tim_c_que.viewmodel.MealViewModel
 import com.example.l_tim_c_que.viewmodel.MealViewModelFactory
+import com.example.l_tim_c_que.viewmodel.DetailViewModel
+import com.example.l_tim_c_que.viewmodel.MealDetailViewModel
+import com.example.l_tim_c_que.viewmodel.MealDetailViewModelFactory
 import kotlin.getValue
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Button
 import com.bumptech.glide.Glide
+import com.example.l_tim_c_que.api.APIModel
 
 
 /**
@@ -24,15 +28,18 @@ import com.bumptech.glide.Glide
  * create an instance of this fragment.
  */
 class DetailFragment : Fragment() {
-    private val mealViewModel: MealViewModel by activityViewModels {
-        MealViewModelFactory(MealRepository(APIClient.api))
+
+    private val mealDetailViewModel: MealDetailViewModel by activityViewModels {
+        MealDetailViewModelFactory(MealRepository(APIClient.api))
     }
+
+    private val detailViewModel: DetailViewModel by activityViewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_meal_details, container, false)
     }
 
@@ -45,42 +52,58 @@ class DetailFragment : Fragment() {
         val bookmark = view.findViewById<Button>(R.id.bookmark_button)
         val ingredients = view.findViewById<TextView>(R.id.recipe_ingredients_list)
         val instructions = view.findViewById<TextView>(R.id.recipe_instructions)
+        val loadBar = view.findViewById<View>(R.id.progressBarDetail)
+        val scrollView = view.findViewById<View>(R.id.content_scroll_view)
 
-
-        mealViewModel.mealDetail.observe(viewLifecycleOwner) { mealDetail ->
-            if (mealDetail == null) {
-                return@observe
-            }
-            else{
-                Glide.with(banner.context).load(mealDetail.imageUrl).into(banner)
-                title.text = mealDetail.name
-                country.text = " ${mealDetail.area}"
-
-                var ingredientList = ""
-
-                for (i in 1..20) {
-                    val ingredient = mealDetail.getIngredient(i)
-                    val measure = mealDetail.getMeasure(i)
-                    if (!ingredient.isNullOrBlank() && !measure.isNullOrBlank()) {
-                        ingredientList += "$ingredient - $measure\n"
-                    }
-                }
-                ingredients.text = ingredientList
-
-                var instructionList = ""
-                val instructionsList = mealDetail.instructions?.split("\n")
-                if (instructionsList != null) {
-                    for (instruction in instructionsList) {
-                        if (instruction.isNotBlank()) {
-                            instructionList += "$instruction\n\n"
-                        }
-                    }
-                }
-                instructions.text = instructionList
-            }
-
-
+        detailViewModel.detailID.observe(viewLifecycleOwner) { id ->
+            mealDetailViewModel.searchMealById(id)
         }
+
+        mealDetailViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            view.setLoadingState(isLoading, loadBar, scrollView)
+        }
+
+        mealDetailViewModel.mealDetail.observe(viewLifecycleOwner) { mealDetail ->
+            mealDetail?.let {
+                banner.updateImage(it.imageUrl)
+                title.updateText(it.name)
+                country.updateText(" ${it.area}")
+                ingredients.updateIngredients(it)
+                instructions.updateInstructions(it)
+            }
+        }
+    }
+
+    fun View.setLoadingState(isLoading: Boolean, progressBar: View, contentView: View) {
+        progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        contentView.visibility = if (isLoading) View.GONE else View.VISIBLE
+    }
+
+    fun ImageView.updateImage(url: String?) {
+        Glide.with(this.context).load(url).into(this)
+    }
+
+    fun TextView.updateText(text: String?) {
+        this.text = text
+    }
+
+    fun TextView.updateIngredients(mealDetail: APIModel.MealDetail) {
+        val ingredientList = (1..20)
+            .mapNotNull { i ->
+                val ingredient = mealDetail.getIngredient(i)
+                val measure = mealDetail.getMeasure(i)
+                if (!ingredient.isNullOrBlank() && !measure.isNullOrBlank()) "$ingredient - $measure" else null
+            }
+            .joinToString("\n")
+        this.text = ingredientList
+    }
+
+    fun TextView.updateInstructions(mealDetail: APIModel.MealDetail) {
+        val instructionList = mealDetail.instructions
+            ?.split("\n")
+            ?.filter { it.isNotBlank() }
+            ?.joinToString("\n\n")
+        this.text = instructionList
     }
 
 }
