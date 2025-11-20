@@ -2,34 +2,34 @@ package com.example.l_tim_c_que.firebase
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.example.l_tim_c_que.api.APIModel
-// import com.example.l_tim_c_que.Recipe
 import com.google.firebase.auth.auth
 import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.AggregateSource
-import com.google.firebase.firestore.Filter
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.memoryCacheSettings
 import com.google.firebase.firestore.persistentCacheSettings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Date
 
 object FirebaseDB {
-    val auth = Firebase.auth
+    lateinit var auth: FirebaseAuth
     @SuppressLint("StaticFieldLeak")
-    val firestore = Firebase.firestore
+    lateinit var firestore: FirebaseFirestore
     val settings = firestoreSettings {
-        // Use memory cache
-        setLocalCacheSettings(memoryCacheSettings {})
-        // Use persistent disk cache (default)
         setLocalCacheSettings(persistentCacheSettings {})
-    }
-    init {
-        firestore.firestoreSettings = settings
     }
     val currentUser: FirebaseUser?
         get() = auth.currentUser
@@ -39,17 +39,18 @@ object FirebaseDB {
             return
         }
         else {
-            auth.signInAnonymously()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Log.d(TAG, "signInAnonymously:success")
-                        onComplete?.invoke(true)
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w(TAG, "signInAnonymously:failure", task.exception)
-                        onComplete?.invoke(false)
-                    }
+            if (NetworkChecker.status.value)
+                auth.signInAnonymously()
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d(TAG, "signInAnonymously:success")
+                            onComplete?.invoke(true)
+                        } else {
+                            Log.w(TAG, "signInAnonymously:failure", task.exception)
+                            onComplete?.invoke(false)
+                        }
                 }
+            else onComplete?.invoke(false)
         }
     }
 
@@ -120,5 +121,27 @@ object FirebaseDB {
                     firestore.collection("recent").document(id).delete()
                 }
             }
+    }
+
+    fun init(context: Context) {
+        NetworkChecker.init(context)
+        FirebaseApp.initializeApp(context)
+
+        this.auth = Firebase.auth
+        this.firestore = Firebase.firestore
+        firestore.firestoreSettings = settings
+
+        CoroutineScope(Dispatchers.Default).launch {
+            NetworkChecker.status.collect { online ->
+                if (online) firestore.enableNetwork()
+                else firestore.disableNetwork()
+            }
+        }
+
+        signIn { it -> if (!it) Toast.makeText(
+            context,
+            "Anonymous Sign In failed. Please connect to the internet at least once before using the app.",
+            Toast.LENGTH_LONG
+        ).show() }
     }
 }
