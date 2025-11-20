@@ -60,9 +60,8 @@ object FirebaseDB {
             onComplete.invoke(false)
             return
         }
-        val bookmark = hashMapOf(
-            "userID" to currentUser!!.uid,
-            "recipe" to meal
+        val bookmark = FirebaseModels.Bookmark(
+            currentUser!!.uid,meal.id, meal
         )
         firestore.collection("bookmarks")
             .add(bookmark)
@@ -83,17 +82,18 @@ object FirebaseDB {
             return
         }
 
+        // check if already in recently viewed
+        if(isInBookmarks(meal.id))
+            return
         val count = firestore.collection("recent").count().get(AggregateSource.SERVER).result.count
         // check if recent is equal to 4, delete excess if yes
         if(count >= 4) {
-            val overflow = count - 4
+            val overflow = count - 3
             deleteOldest(overflow)
         }
 
-        val recent = hashMapOf(
-            "userID" to currentUser!!.uid,
-            "recipe" to meal,
-            "date" to Timestamp(Date())
+        val recent = FirebaseModels.Recent(
+            currentUser!!.uid,meal.id, meal, Timestamp(Date())
         )
 
         firestore.collection("recent")
@@ -108,6 +108,26 @@ object FirebaseDB {
             }
     }
 
+    fun removeBookmark(meal: APIModel.MealDetail) {
+        firestore.collection("bookmarks")
+            .document(
+                firestore.collection("bookmarks")
+                    .whereIn("meal_id", listOf(meal.id))
+                    .get()
+                    .result
+                    .first()
+                    .id
+            ).delete()
+    }
+    fun isInBookmarks(id: String): Boolean {
+        if (firestore.collection("bookmarks")
+            .whereIn("meal_id", listOf(id))
+            .get()
+            .result
+            .firstOrNull() != null)
+            return true
+        else return false
+    }
     fun deleteOldest(overflow: Long) {
         firestore.collection("recent")
             .orderBy("Timestamp", Query.Direction.ASCENDING)

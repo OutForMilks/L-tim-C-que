@@ -6,13 +6,15 @@ import com.google.firebase.Timestamp
 object FirebaseModels {
 
     data class Bookmark(
-        val uid: String,
+        val user_id: String,
+        val meal_id: String,
         val recipe: APIModel.MealDetail
     )
 
     data class Recent(
-        val uid: String,
+        val user_id: String,
+        val meal_id: String,
         val recipe: APIModel.MealDetail,
-        val date: Timestamp
+        val timestamp: Timestamp
     )
 }
