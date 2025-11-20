@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
-import com.example.l_tim_c_que.viewmodel.DetailViewModel
 import com.example.l_tim_c_que.R
 import com.example.l_tim_c_que.api.APIClient
 import com.example.l_tim_c_que.repository.MealRepository
@@ -27,8 +26,10 @@ import com.example.l_tim_c_que.util.GridSpacingItemDecoration
 import com.example.l_tim_c_que.viewmodel.SearchViewModel
 import com.example.l_tim_c_que.viewmodel.MealViewModel
 import com.example.l_tim_c_que.viewmodel.MealViewModelFactory
+import com.example.l_tim_c_que.viewmodel.DetailViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
+
 
 
 class SearchFragment : Fragment() {
@@ -36,6 +37,7 @@ class SearchFragment : Fragment() {
     private val searchViewModel: SearchViewModel by activityViewModels()
 
     private val detailViewModel: DetailViewModel by activityViewModels()
+
 
     private val mealViewModel: MealViewModel by activityViewModels {
         MealViewModelFactory(MealRepository(APIClient.api))
@@ -60,6 +62,7 @@ class SearchFragment : Fragment() {
         val title = view.findViewById<TextView>(R.id.tvTitle)
         val search = view.findViewById<View>(R.id.search_bar)
         val filter = view.findViewById<View>(R.id.filter_buttons)
+        val loadBar = view.findViewById<View>(R.id.progressBar)
 
         title.visibility = View.VISIBLE
         search.visibility = View.VISIBLE
@@ -73,7 +76,15 @@ class SearchFragment : Fragment() {
         val spacingInPixels = (22 * resources.displayMetrics.density).toInt()
         recycleView.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, false))
 
-
+        mealViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (isLoading) {
+                loadBar.visibility = View.VISIBLE
+                recycleView.visibility = View.GONE
+            } else {
+                loadBar.visibility = View.GONE
+                recycleView.visibility = View.VISIBLE
+            }
+        }
 
         mealViewModel.meals.observe(viewLifecycleOwner) { meals ->
             adapter.submitList(meals)
@@ -95,15 +106,9 @@ class SearchFragment : Fragment() {
                 if (query.isNotEmpty()) {
 
                     searchViewModel.setSearchQuery(query)
-
-                    val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-
-                    bottomNav.post {
-                        bottomNav.selectedItemId = R.id.searchFragment
-                    }
-
                     val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.hideSoftInputFromWindow(etSearch.windowToken, 0)
+                    etSearch.clearFocus()
                 }
                 true
             } else {
@@ -153,7 +158,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun navigateToDetails(mealId: String) {
-        mealViewModel.searchMealById(mealId)
+        detailViewModel.setDetailID(mealId)
         findNavController().navigate(R.id.action_search_to_detail)
     }
 
