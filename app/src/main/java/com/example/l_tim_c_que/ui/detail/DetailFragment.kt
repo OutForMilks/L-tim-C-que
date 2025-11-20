@@ -23,17 +23,16 @@ import com.example.l_tim_c_que.api.APIModel
 
 
 /**
- * A simple [Fragment] subclass.
- * Use the [DetailFragment.newInstance] factory method to
- * create an instance of this fragment.
+ * A simple [Fragment] subclass for displaying meal details.
+ * Uses ViewModels to fetch and observe meal data.
  */
 class DetailFragment : Fragment() {
 
-    private val mealDetailViewModel: MealDetailViewModel by activityViewModels {
+    internal val mealDetailViewModel: MealDetailViewModel by activityViewModels {
         MealDetailViewModelFactory(MealRepository(APIClient.api))
     }
 
-    private val detailViewModel: DetailViewModel by activityViewModels()
+    internal val detailViewModel: DetailViewModel by activityViewModels()
 
 
     override fun onCreateView(
@@ -45,65 +44,104 @@ class DetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupViews(view)
+        setupObservers(view)
+    }
+}
 
-        val banner = view.findViewById<ImageView>(R.id.recipe_banner)
-        val title = view.findViewById<TextView>(R.id.recipe_title)
-        val country = view.findViewById<TextView>(R.id.recipe_country)
-        val bookmark = view.findViewById<Button>(R.id.bookmark_button)
-        val ingredients = view.findViewById<TextView>(R.id.recipe_ingredients_list)
-        val instructions = view.findViewById<TextView>(R.id.recipe_instructions)
-        val loadBar = view.findViewById<View>(R.id.progressBarDetail)
-        val scrollView = view.findViewById<View>(R.id.content_scroll_view)
+/**
+ * Initializes the views and sets up initial state if needed.
+ * Currently acts as a holder for view references used in observers.
+ * @param view The root view of the fragment.
+ */
+private fun DetailFragment.setupViews(view: View) {
+    // No specific initial setup needed beyond findViewById which is done in update methods or observers
+    // But we can keep it for structure or future initializations
+}
 
-        detailViewModel.detailID.observe(viewLifecycleOwner) { id ->
-            mealDetailViewModel.searchMealById(id)
+/**
+ * Sets up observers for ViewModels to update the UI when data changes.
+ * @param view The root view of the fragment.
+ */
+private fun DetailFragment.setupObservers(view: View) {
+    val banner = view.findViewById<ImageView>(R.id.recipe_banner)
+    val title = view.findViewById<TextView>(R.id.recipe_title)
+    val country = view.findViewById<TextView>(R.id.recipe_country)
+    // val bookmark = view.findViewById<Button>(R.id.bookmark_button) // Unused currently
+    val ingredients = view.findViewById<TextView>(R.id.recipe_ingredients_list)
+    val instructions = view.findViewById<TextView>(R.id.recipe_instructions)
+    val loadBar = view.findViewById<View>(R.id.progressBarDetail)
+    val scrollView = view.findViewById<View>(R.id.content_scroll_view)
+
+    detailViewModel.detailID.observe(viewLifecycleOwner) { id ->
+        mealDetailViewModel.searchMealById(id)
+    }
+
+    mealDetailViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+        setLoadingState(isLoading, loadBar, scrollView)
+    }
+
+    mealDetailViewModel.mealDetail.observe(viewLifecycleOwner) { mealDetail ->
+        mealDetail?.let {
+            banner.updateImage(it.imageUrl)
+            title.updateText(it.name)
+            country.updateText(" ${it.area}")
+            ingredients.updateIngredients(it)
+            instructions.updateInstructions(it)
         }
+    }
+}
 
-        mealDetailViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            view.setLoadingState(isLoading, loadBar, scrollView)
+/**
+ * Toggles the visibility of the progress bar and content view based on loading state.
+ * @param isLoading Boolean indicating if data is currently loading.
+ * @param progressBar The progress bar view.
+ * @param contentView The main content view to hide/show.
+ */
+private fun DetailFragment.setLoadingState(isLoading: Boolean, progressBar: View, contentView: View) {
+    progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+    contentView.visibility = if (isLoading) View.GONE else View.VISIBLE
+}
+
+/**
+ * Updates an ImageView with an image from a URL using Glide.
+ * @param url The URL of the image.
+ */
+private fun ImageView.updateImage(url: String?) {
+    Glide.with(this.context).load(url).into(this)
+}
+
+/**
+ * Updates a TextView with the provided text.
+ * @param text The text to display.
+ */
+private fun TextView.updateText(text: String?) {
+    this.text = text
+}
+
+/**
+ * Formats and displays the list of ingredients and measures.
+ * @param mealDetail The meal detail object containing ingredients and measures.
+ */
+private fun TextView.updateIngredients(mealDetail: APIModel.MealDetail) {
+    val ingredientList = (1..20)
+        .mapNotNull { i ->
+            val ingredient = mealDetail.getIngredient(i)
+            val measure = mealDetail.getMeasure(i)
+            if (!ingredient.isNullOrBlank() && !measure.isNullOrBlank()) "$ingredient - $measure" else null
         }
+        .joinToString("\n")
+    this.text = ingredientList
+}
 
-        mealDetailViewModel.mealDetail.observe(viewLifecycleOwner) { mealDetail ->
-            mealDetail?.let {
-                banner.updateImage(it.imageUrl)
-                title.updateText(it.name)
-                country.updateText(" ${it.area}")
-                ingredients.updateIngredients(it)
-                instructions.updateInstructions(it)
-            }
-        }
-    }
-
-    fun View.setLoadingState(isLoading: Boolean, progressBar: View, contentView: View) {
-        progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        contentView.visibility = if (isLoading) View.GONE else View.VISIBLE
-    }
-
-    fun ImageView.updateImage(url: String?) {
-        Glide.with(this.context).load(url).into(this)
-    }
-
-    fun TextView.updateText(text: String?) {
-        this.text = text
-    }
-
-    fun TextView.updateIngredients(mealDetail: APIModel.MealDetail) {
-        val ingredientList = (1..20)
-            .mapNotNull { i ->
-                val ingredient = mealDetail.getIngredient(i)
-                val measure = mealDetail.getMeasure(i)
-                if (!ingredient.isNullOrBlank() && !measure.isNullOrBlank()) "$ingredient - $measure" else null
-            }
-            .joinToString("\n")
-        this.text = ingredientList
-    }
-
-    fun TextView.updateInstructions(mealDetail: APIModel.MealDetail) {
-        val instructionList = mealDetail.instructions
-            ?.split("\n")
-            ?.filter { it.isNotBlank() }
-            ?.joinToString("\n\n")
-        this.text = instructionList
-    }
-
+/**
+ * Formats and displays the cooking instructions.
+ * @param mealDetail The meal detail object containing instructions.
+ */
+private fun TextView.updateInstructions(mealDetail: APIModel.MealDetail) {
+    val instructionList = mealDetail.instructions
+        ?.split("\n")
+        ?.filter { it.isNotBlank() }
+        ?.joinToString("\n\n")
+    this.text = instructionList
 }

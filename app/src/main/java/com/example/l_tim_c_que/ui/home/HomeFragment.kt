@@ -2,32 +2,31 @@ package com.example.l_tim_c_que.ui.home
 
 import android.content.Context
 import android.os.Bundle
-
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import android.widget.ImageButton
-import androidx.core.view.isVisible
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
-import com.google.android.material.button.MaterialButton
-
 import com.example.l_tim_c_que.R
 import com.example.l_tim_c_que.viewmodel.SearchViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
 
+/**
+ * Fragment responsible for the home screen.
+ * Handles the display of the welcome message, search bar, and filter options.
+ */
 class HomeFragment : Fragment() {
 
-    private val searchViewModel: SearchViewModel by activityViewModels()
+    internal val searchViewModel: SearchViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,76 +39,124 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val title = view.findViewById<TextView>(R.id.tvTitle)
-        val search = view.findViewById<View>(R.id.search_bar)
-        val header = view.findViewById<View>(R.id.header)
-        val filter = view.findViewById<View>(R.id.filter_buttons)
+        setupHeader(view)
+        setupSearchBar(view)
+        setupFilterButtons(view)
+    }
+}
 
-        title.visibility = View.VISIBLE
-        search.visibility = View.VISIBLE
-        header.visibility = View.VISIBLE
+/**
+ * Initializes the header section of the home screen.
+ * Sets the title, search bar, and header visibility.
+ *
+ * @param view The root view of the fragment.
+ */
+private fun HomeFragment.setupHeader(view: View) {
+    val title = view.findViewById<TextView>(R.id.tvTitle)
+    val search = view.findViewById<View>(R.id.search_bar)
+    val header = view.findViewById<View>(R.id.header)
 
-        val etSearch = view.findViewById<EditText>(R.id.searchbar_text)
+    title.visibility = View.VISIBLE
+    search.visibility = View.VISIBLE
+    header.visibility = View.VISIBLE
+}
 
-        etSearch.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val query = etSearch.text.toString().trim()
-                if (query.isNotEmpty()) {
+/**
+ * Configures the search bar behavior.
+ * Listens for the search action on the keyboard, updates the search query,
+ * navigates to the search fragment, and hides the keyboard.
+ *
+ * @param view The root view of the fragment.
+ */
+private fun HomeFragment.setupSearchBar(view: View) {
+    val etSearch = view.findViewById<EditText>(R.id.searchbar_text)
 
-                    searchViewModel.setSearchQuery(query)
-                    if(searchViewModel.filter.value == null){
-                        searchViewModel.setFilter("name")
-                    }
-
-                    val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-
-                    bottomNav.post {
-                        bottomNav.selectedItemId = R.id.searchFragment
-                    }
-
-                    val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(etSearch.windowToken, 0)
-                }
-                true
-            } else {
-                false
+    etSearch.setOnEditorActionListener { _, actionId, _ ->
+        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+            val query = etSearch.text.toString().trim()
+            if (query.isNotEmpty()) {
+                performSearch(query, etSearch)
             }
+            true
+        } else {
+            false
         }
+    }
+}
 
-        val filterButton = view.findViewById<ImageButton>(R.id.filter_icon)
-        filterButton.setOnClickListener {
-            val parent = filter.parent as ViewGroup
+/**
+ * Performs the search operation.
+ * Updates the ViewModel, sets the default filter if needed,
+ * navigates to the SearchFragment via the BottomNavigationView, and hides the keyboard.
+ *
+ * @param query The search query string.
+ * @param etSearch The EditText view for search input.
+ */
+private fun HomeFragment.performSearch(query: String, etSearch: EditText) {
+    searchViewModel.setSearchQuery(query)
+    if (searchViewModel.filter.value == null) {
+        searchViewModel.setFilter("name")
+    }
 
-            // Animate layout changes in the parent
-            TransitionManager.beginDelayedTransition(parent, AutoTransition().apply {
-                duration = 300 // drop-down duration in ms
-            })
+    val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
-            // Toggle visibility
-            filter.visibility = if (filter.isVisible) View.GONE else View.VISIBLE
-        }
+    bottomNav.post {
+        bottomNav.selectedItemId = R.id.searchFragment
+    }
 
+    val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(etSearch.windowToken, 0)
+}
 
-        val nameBtn = view.findViewById<MaterialButton>(R.id.nameBtn)
-        val originBtn = view.findViewById<MaterialButton>(R.id.originBtn)
-        val ingredientBtn = view.findViewById<MaterialButton>(R.id.ingredientBtn)
+/**
+ * Sets up the filter buttons and the toggle mechanism for the filter section.
+ * Handles animations and state updates for filter selection.
+ *
+ * @param view The root view of the fragment.
+ */
+private fun HomeFragment.setupFilterButtons(view: View) {
+    val filter = view.findViewById<View>(R.id.filter_buttons)
+    val filterButton = view.findViewById<ImageButton>(R.id.filter_icon)
 
-        val buttons = listOf(nameBtn, originBtn, ingredientBtn)
+    filterButton.setOnClickListener {
+        val parent = filter.parent as ViewGroup
 
-        buttons.forEach { button ->
-            button.setOnClickListener {
-                // Uncheck all buttons first
-                buttons.forEach { it.setBackgroundResource(R.drawable.bg_filter) }
-                // Check the clicked button
-                button.setBackgroundResource(R.drawable.bg_filter_selected)
-                // Update the ViewModel filter
-                when (button.id) {
-                    R.id.nameBtn -> searchViewModel.setFilter("name")
-                    R.id.originBtn -> searchViewModel.setFilter("origin")
-                    R.id.ingredientBtn -> searchViewModel.setFilter("ingredient")
-                }
+        // Animate layout changes in the parent
+        TransitionManager.beginDelayedTransition(parent, AutoTransition().apply {
+            duration = 300 // drop-down duration in ms
+        })
+
+        // Toggle visibility
+        filter.visibility = if (filter.isVisible) View.GONE else View.VISIBLE
+    }
+
+    setupFilterSelection(view)
+}
+
+/**
+ * Configures the selection logic for filter buttons (Name, Origin, Ingredient).
+ *
+ * @param view The root view of the fragment.
+ */
+private fun HomeFragment.setupFilterSelection(view: View) {
+    val nameBtn = view.findViewById<MaterialButton>(R.id.nameBtn)
+    val originBtn = view.findViewById<MaterialButton>(R.id.originBtn)
+    val ingredientBtn = view.findViewById<MaterialButton>(R.id.ingredientBtn)
+
+    val buttons = listOf(nameBtn, originBtn, ingredientBtn)
+
+    buttons.forEach { button ->
+        button.setOnClickListener {
+            // Uncheck all buttons first
+            buttons.forEach { it.setBackgroundResource(R.drawable.bg_filter) }
+            // Check the clicked button
+            button.setBackgroundResource(R.drawable.bg_filter_selected)
+            // Update the ViewModel filter
+            when (button.id) {
+                R.id.nameBtn -> searchViewModel.setFilter("name")
+                R.id.originBtn -> searchViewModel.setFilter("origin")
+                R.id.ingredientBtn -> searchViewModel.setFilter("ingredient")
             }
         }
     }
-
 }
