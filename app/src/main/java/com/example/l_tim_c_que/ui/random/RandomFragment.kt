@@ -52,6 +52,8 @@ class RandomFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        randomViewModel.searchMealByRandom()
+
         return inflater.inflate(R.layout.fragment_meal_details, container, false)
     }
 
@@ -87,7 +89,6 @@ private fun RandomFragment.setupObservers(view: View) {
     val loadBar = view.findViewById<View>(R.id.progressBarDetail)
     val scrollView = view.findViewById<View>(R.id.content_scroll_view)
 
-    randomViewModel.searchMealByRandom()
 
     randomViewModel.mealId.observe(viewLifecycleOwner) { id ->
         if (!id.isNullOrBlank()) {
