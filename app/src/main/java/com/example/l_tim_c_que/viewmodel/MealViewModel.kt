@@ -26,13 +26,6 @@ class MealViewModel (
      */
     val meals: LiveData<List<APIModel.Meal>> = _meals
 
-    // Holds the details of a single meal.
-    private val _mealDetail = MutableLiveData<APIModel.MealDetail?>()
-    /**
-     * Exposes the meal detail to the UI.
-     */
-    val mealDetail: LiveData<APIModel.MealDetail?> = _mealDetail
-
     // Indicates whether a network operation is in progress.
     private val _isLoading = MutableLiveData<Boolean>()
     /**
@@ -81,27 +74,6 @@ class MealViewModel (
             try {
                 val response = mealRepository.getMealByIngredient(ingredient)
                 _meals.value = response
-            } catch (e: Exception) {
-                _errorMessage.value = e.message
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    /**
-     * Searches for a meal by its ID.
-     * The result is posted to the [_mealDetail] LiveData.
-     * @param id The ID of the meal to search for.
-     */
-    fun searchMealById(id: String) {
-        _isLoading.value = true
-        _errorMessage.value = null
-
-        viewModelScope.launch {
-            try {
-                val response = mealRepository.getMealById(id)
-                _mealDetail.value = response
             } catch (e: Exception) {
                 _errorMessage.value = e.message
             } finally {
