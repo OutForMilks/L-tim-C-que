@@ -33,6 +33,11 @@ object FirebaseDB {
     }
     val currentUser: FirebaseUser?
         get() = auth.currentUser
+
+    /**
+     * Signs in a user anonymously
+     * @param onComplete boolean callback to check for successful login
+     */
     fun signIn(onComplete: ((Boolean) -> Unit)? = null) {
         if(currentUser != null) {
             onComplete?.invoke(true)
@@ -54,6 +59,33 @@ object FirebaseDB {
         }
     }
 
+    fun getAllBookmarks(onComplete: (List<APIModel.MealDetail>) -> Unit) {
+        firestore.collection("bookmarks")
+            .whereEqualTo("user_id", currentUser?.uid)
+            .get()
+            .addOnSuccessListener { result ->
+                val list = mutableListOf<APIModel.MealDetail>()
+                result.forEach{ a -> list.add(a.toObject(FirebaseModels.Bookmark::class.java).recipe)}
+                onComplete(list)
+            }
+            .addOnFailureListener {
+                onComplete(emptyList())
+            }
+    }
+
+    fun getAllRecent(onComplete: (List<APIModel.MealDetail>) -> Unit) {
+        firestore.collection("recent")
+            .whereEqualTo("user_id", currentUser?.uid)
+            .get()
+            .addOnSuccessListener { result ->
+                val list = mutableListOf<APIModel.MealDetail>()
+                result.forEach{ a -> list.add(a.toObject(FirebaseModels.Recent::class.java).recipe)}
+                onComplete(list)
+            }
+            .addOnFailureListener {
+                onComplete(emptyList())
+            }
+    }
     fun saveBookmark(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit): Unit {
         if(currentUser == null) {
             Log.w(TAG, "No current user. Cannot save bookmark.")
