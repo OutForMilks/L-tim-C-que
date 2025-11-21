@@ -2,6 +2,7 @@ package com.example.l_tim_c_que.repository
 
 import com.example.l_tim_c_que.api.APIService
 import com.example.l_tim_c_que.api.APIModel
+import com.example.l_tim_c_que.firebase.FirebaseDB
 
 /* TODO: Add firebase manager
          Implement Error messages
@@ -69,5 +70,23 @@ class MealRepository(
     suspend fun getMealById(id: String): APIModel.MealDetail? {
         val response = apiService.getMealById(id)
         return response.meals?.firstOrNull()
+    }
+
+    /**
+     * Fetches user's list of bookmarked recipes, based on [FirebaseDB.currentUser]
+     *
+     * @return A [APIModel.MealDetail] object if found, or null otherwise.
+     */
+    suspend fun getBookmarkList(): List<APIModel.Meal> {
+        return FirebaseDB.getAllBookmarks()
+    }
+
+    /**
+     * Fetches the user's list of recently viewed (limited to 4), based on [FirebaseDB.currentUser]
+     *
+     * @return A list of [APIModel.Meal] objects, or an empty list if no matches are found.
+     */
+    suspend fun getRecentlyViewedList(): List<APIModel.Meal> {
+        return FirebaseDB.getAllRecent()
     }
 }
