@@ -3,6 +3,10 @@ package com.example.l_tim_c_que.firebase
 import com.example.l_tim_c_que.api.APIModel
 import com.google.firebase.Timestamp
 
+/**
+ * Data classes representing how Bookmarks and Recently Viewed
+ * are stored in Firestore
+ */
 object FirebaseModels {
 
     data class Bookmark(

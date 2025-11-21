@@ -8,9 +8,13 @@ import android.net.NetworkRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+/**
+ * Used to monitor changes in the user's network status.
+ */
 object NetworkChecker {
     private lateinit var connectivityManager: ConnectivityManager
     private val isOnline = MutableStateFlow(false)
+    // returns whether the user is connected to a network or not
     val status = isOnline.asStateFlow()
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
