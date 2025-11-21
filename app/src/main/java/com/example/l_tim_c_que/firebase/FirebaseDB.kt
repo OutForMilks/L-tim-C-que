@@ -104,6 +104,48 @@ object FirebaseDB {
     }
 
     /**
+     * Returns a specific meal in the user's bookmark list based on the given ID
+     * @param id the id of the meal
+     * @return MealDetail referring to that id, or null
+     */
+    suspend fun getSpecificBookmark(id: String): APIModel.MealDetail? {
+        return try {
+            val snapshot = firestore.collection("bookmarks")
+                .whereEqualTo("user_id", currentUser?.uid)
+                .whereEqualTo("meal_id", id)
+                .get()
+                .await()
+
+            snapshot.first().toObject(FirebaseModels.Recent::class.java).recipe
+        } catch (e: Exception) {
+            Log.w(TAG, "Fetch list of recently viewed failed", e)
+
+            null
+        }
+    }
+
+    /**
+     * Returns a specific meal in the user's bookmark list based on the given ID
+     * @param id the id of the meal
+     * @return MealDetail referring to that id, or null
+     */
+    suspend fun getSpecificRecent(id: String): APIModel.MealDetail? {
+        return try {
+            val snapshot = firestore.collection("recent")
+                .whereEqualTo("user_id", currentUser?.uid)
+                .whereEqualTo("meal_id", id)
+                .get()
+                .await()
+
+            snapshot.first().toObject(FirebaseModels.Recent::class.java).recipe
+        } catch (e: Exception) {
+            Log.w(TAG, "Fetch list of recently viewed failed", e)
+
+            null
+        }
+    }
+
+    /**
      * Saves a meal to the user's bookmarked list
      * @param meal the MealDetail to be saved
      * @param onComplete callback function with boolean for status
