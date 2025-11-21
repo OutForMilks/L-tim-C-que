@@ -1,6 +1,8 @@
 package com.example.l_tim_c_que.ui.detail
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -92,6 +94,10 @@ private fun DetailFragment.setupObservers(view: View) {
             ingredients.updateIngredients(it)
             instructions.updateInstructions(it)
             bookmark.bookmarkStatus(it.id)
+
+            FirebaseDB.saveRecent(mealDetail) {
+                Log.d("DetailFragment", "Saved to recently viewed")
+            }
         }
     }
 
