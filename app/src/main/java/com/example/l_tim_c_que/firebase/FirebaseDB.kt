@@ -23,14 +23,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Date
 
+/**
+ * Helper object for interacting with Firebase console
+ */
 object FirebaseDB {
     lateinit var auth: FirebaseAuth
     @SuppressLint("StaticFieldLeak")
     lateinit var firestore: FirebaseFirestore
-    val TAG = "FirebaseDB"
+    val TAG = "FirebaseDB" // for identifying in LogCat
     val settings = firestoreSettings {
         setLocalCacheSettings(persistentCacheSettings {})
     }
+
+    /**
+     * FirebaseUser containing the current user, done via anonymous sign-in
+     * get() @returns the current user
+     */
     val currentUser: FirebaseUser?
         get() = auth.currentUser
 
@@ -59,6 +67,10 @@ object FirebaseDB {
         }
     }
 
+    /**
+     * Returns all bookmarked meals tied to a user
+     * @param onComplete callback with list of MealDetail
+     */
     fun getAllBookmarks(onComplete: (List<APIModel.MealDetail>) -> Unit) {
         firestore.collection("bookmarks")
             .whereEqualTo("user_id", currentUser?.uid)
@@ -73,6 +85,10 @@ object FirebaseDB {
             }
     }
 
+    /**
+     * Returns all recently viewed meals tied to a user
+     * @param onComplete callback with list of MealDetail
+     */
     fun getAllRecent(onComplete: (List<APIModel.MealDetail>) -> Unit) {
         firestore.collection("recent")
             .whereEqualTo("user_id", currentUser?.uid)
@@ -86,6 +102,12 @@ object FirebaseDB {
                 onComplete(emptyList())
             }
     }
+
+    /**
+     * Saves a meal to the user's bookmarked list
+     * @param meal the MealDetail to be saved
+     * @param onComplete callback function with boolean for status
+     */
     fun saveBookmark(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit): Unit {
         if(currentUser == null) {
             Log.w(TAG, "No current user. Cannot save bookmark.")
@@ -114,6 +136,13 @@ object FirebaseDB {
         }
     }
 
+    /**
+     * Saves a meal to the user's recently viewed list.
+     * Also removes the oldest items if number of items
+     * in list is greater than 4
+     * @param meal the MealDetail to be saved
+     * @param onComplete callback function with boolean for status
+     */
     fun saveRecent(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit): Unit {
         if(currentUser == null) {
             Log.w(TAG, "No current user. Recently viewed not updated.")
@@ -158,6 +187,11 @@ object FirebaseDB {
         }
     }
 
+    /**
+     * Removes a bookmark from the user's list of bookmarks
+     * @param meal the MealDetail to remove
+     * @param onComplete callback function with boolean for status
+     */
     fun removeBookmark(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit): Unit {
         firestore.collection("bookmarks")
             .whereEqualTo("meal_id", meal.id)
@@ -179,6 +213,12 @@ object FirebaseDB {
                 onComplete.invoke(false)
             }
     }
+
+    /**
+     * Checks if meal id is in user's list of bookmarks
+     * @param id meal id to check
+     * @param callback contains boolean for status
+     */
     fun isInBookmarks(id: String, callback: (Boolean) -> Unit) {
         firestore.collection("bookmarks")
             .whereEqualTo("meal_id", id)
@@ -192,6 +232,12 @@ object FirebaseDB {
             }
     }
 
+    /**
+     * Checks if meal id is in user's list of recently viewed
+     * and updates timestamp if so
+     * @param id meal id to check
+     * @param callback contains boolean for status
+     */
     fun isInRecent(id: String, callback: (Boolean) -> Unit) {
         firestore.collection("recent")
             .whereEqualTo("meal_id", id)
@@ -205,6 +251,10 @@ object FirebaseDB {
             }
     }
 
+    /**
+     * Deletes the oldest meals from the user list of recently viewed.
+     * @param overflow the number of items to delete
+     */
     fun deleteOldest(overflow: Long) {
         firestore.collection("recent")
             .whereEqualTo("user_id", currentUser!!.uid)
@@ -219,6 +269,10 @@ object FirebaseDB {
             }
     }
 
+    /**
+     * Initializes Firebase and calls signIn(). Also runs a coroutine to check for network changes.
+     * @param context the context this was called in
+     */
     fun init(context: Context) {
         NetworkChecker.init(context)
         FirebaseApp.initializeApp(context)
