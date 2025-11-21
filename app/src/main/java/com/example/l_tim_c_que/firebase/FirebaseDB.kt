@@ -1,7 +1,6 @@
 package com.example.l_tim_c_que.firebase
 
 import android.annotation.SuppressLint
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
@@ -28,6 +27,7 @@ object FirebaseDB {
     lateinit var auth: FirebaseAuth
     @SuppressLint("StaticFieldLeak")
     lateinit var firestore: FirebaseFirestore
+    val TAG = "FirebaseDB"
     val settings = firestoreSettings {
         setLocalCacheSettings(persistentCacheSettings {})
     }
@@ -111,22 +111,25 @@ object FirebaseDB {
     }
 
     fun removeBookmark(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit): Unit {
-        try {
-            firestore.collection("bookmarks")
-                .document(
+        firestore.collection("bookmarks")
+            .whereEqualTo("meal_id", meal.id)
+            .whereEqualTo("user_id", currentUser?.uid)
+            .get()
+            .addOnSuccessListener { it ->
+                val document = it.documents.firstOrNull()
+                if (document != null) {
                     firestore.collection("bookmarks")
-                        .whereIn("meal_id", listOf(meal.id))
-                        .get()
-                        .result
-                        .first()
-                        .id
-                ).delete()
-            Log.d(TAG, "Bookmark deletion of ${meal.name} success")
-            onComplete.invoke(true)
-        } catch(e: Exception) {
-            Log.w(TAG, "Bookmark deletion of ${meal.name} failed. ${e.message}")
-            onComplete.invoke(false)
-        }
+                        .document(
+                            document.id
+                        ).delete().addOnCompleteListener {
+                            Log.d(TAG, "Bookmark deletion of ${meal.name} success")
+                            onComplete.invoke(true)
+                        }
+                } else onComplete.invoke(false)
+            }.addOnFailureListener {
+                Log.w(TAG, "Bookmark deletion of ${meal.name} failed.")
+                onComplete.invoke(false)
+            }
     }
     fun isInBookmarks(id: String, callback: (Boolean) -> Unit) {
         firestore.collection("bookmarks")
