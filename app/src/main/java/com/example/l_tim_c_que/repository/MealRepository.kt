@@ -89,4 +89,26 @@ class MealRepository(
     suspend fun getRecentlyViewedList(): List<APIModel.Meal> {
         return FirebaseDB.getAllRecent()
     }
+
+    /**
+     * Fetches a specific meal from the user's list of
+     * bookmarks, based on [FirebaseDB.currentUser]
+     *
+     * @param id the id of the meal being fetched
+     * @return [APIModel.MealDetail] object corresponding to the meal id, or null
+     */
+    suspend fun getMealFromBookmarks(id: String): APIModel.MealDetail? {
+        return FirebaseDB.getSpecificBookmark(id)
+    }
+
+    /**
+     * Fetches a specific meal from the user's list of
+     * recently viewed, based on [FirebaseDB.currentUser]
+     *
+     * @param id the id of the meal being fetched
+     * @return [APIModel.MealDetail] object corresponding to the meal id, or null
+     */
+    suspend fun getMealFromRecent(id: String): APIModel.MealDetail? {
+        return FirebaseDB.getSpecificRecent(id)
+    }
 }
