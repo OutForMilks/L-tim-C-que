@@ -214,6 +214,12 @@ object APIModel {
             else -> null
         }
 
+        fun toMeal() = Meal(
+            id = id,
+            name = name,
+            imageUrl = imageUrl,
+            area = area
+        )
     }
 
 
