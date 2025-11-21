@@ -83,50 +83,62 @@ object FirebaseDB {
         }
 
         // check if already in recently viewed
-        if(isInBookmarks(meal.id))
-            return
-        val count = firestore.collection("recent").count().get(AggregateSource.SERVER).result.count
-        // check if recent is equal to 4, delete excess if yes
-        if(count >= 4) {
-            val overflow = count - 3
-            deleteOldest(overflow)
+        isInBookmarks(meal.id) { it ->
+            if (it)
+                return@isInBookmarks
+            val count = firestore.collection("recent").count().get(AggregateSource.SERVER).result.count
+            // check if recent is equal to 4, delete excess if yes
+            if(count >= 4) {
+                val overflow = count - 3
+                deleteOldest(overflow)
+            }
+
+            val recent = FirebaseModels.Recent(
+                currentUser!!.uid,meal.id, meal, Timestamp(Date())
+            )
+
+            firestore.collection("recent")
+                .add(recent)
+                .addOnSuccessListener { documentReference ->
+                    Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                    onComplete.invoke(true)
+                }
+                .addOnFailureListener { e ->
+                    Log.w(TAG, "Error adding document", e)
+                    onComplete.invoke(false)
+                }
         }
-
-        val recent = FirebaseModels.Recent(
-            currentUser!!.uid,meal.id, meal, Timestamp(Date())
-        )
-
-        firestore.collection("recent")
-            .add(recent)
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                onComplete.invoke(true)
-            }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error adding document", e)
-                onComplete.invoke(false)
-            }
     }
 
-    fun removeBookmark(meal: APIModel.MealDetail) {
+    fun removeBookmark(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit): Unit {
+        try {
+            firestore.collection("bookmarks")
+                .document(
+                    firestore.collection("bookmarks")
+                        .whereIn("meal_id", listOf(meal.id))
+                        .get()
+                        .result
+                        .first()
+                        .id
+                ).delete()
+            Log.d(TAG, "Bookmark deletion of ${meal.name} success")
+            onComplete.invoke(true)
+        } catch(e: Exception) {
+            Log.w(TAG, "Bookmark deletion of ${meal.name} failed. ${e.message}")
+            onComplete.invoke(false)
+        }
+    }
+    fun isInBookmarks(id: String, callback: (Boolean) -> Unit) {
         firestore.collection("bookmarks")
-            .document(
-                firestore.collection("bookmarks")
-                    .whereIn("meal_id", listOf(meal.id))
-                    .get()
-                    .result
-                    .first()
-                    .id
-            ).delete()
-    }
-    fun isInBookmarks(id: String): Boolean {
-        if (firestore.collection("bookmarks")
-            .whereIn("meal_id", listOf(id))
+            .whereEqualTo("meal_id", id)
+            .whereEqualTo("user_id", currentUser?.uid)
             .get()
-            .result
-            .firstOrNull() != null)
-            return true
-        else return false
+            .addOnSuccessListener { result ->
+                callback(!result.isEmpty)
+            }
+            .addOnFailureListener {
+                callback(false)
+            }
     }
     fun deleteOldest(overflow: Long) {
         firestore.collection("recent")
