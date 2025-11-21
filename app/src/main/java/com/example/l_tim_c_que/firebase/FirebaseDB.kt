@@ -60,19 +60,26 @@ object FirebaseDB {
             onComplete.invoke(false)
             return
         }
-        val bookmark = FirebaseModels.Bookmark(
-            currentUser!!.uid,meal.id, meal
-        )
-        firestore.collection("bookmarks")
-            .add(bookmark)
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                onComplete.invoke(true)
+        isInBookmarks(meal.id) { it ->
+            if(it){
+                Log.d(TAG, "Already in bookmarks")
+                onComplete(true)
+                return@isInBookmarks
             }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error adding document", e)
-                onComplete.invoke(false)
-            }
+            val bookmark = FirebaseModels.Bookmark(
+                currentUser!!.uid,meal.id, meal
+            )
+            firestore.collection("bookmarks")
+                .add(bookmark)
+                .addOnSuccessListener { documentReference ->
+                    Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                    onComplete.invoke(true)
+                }
+                .addOnFailureListener { e ->
+                    Log.w(TAG, "Error adding document", e)
+                    onComplete.invoke(false)
+                }
+        }
     }
 
     fun saveRecent(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit): Unit {
@@ -86,6 +93,7 @@ object FirebaseDB {
         isInRecent(meal.id) { it ->
             if (it){
                 Log.d(TAG, "Already in recently viewed")
+                onComplete(true)
                 return@isInRecent
             }
             firestore.collection("recent")
@@ -168,16 +176,14 @@ object FirebaseDB {
     fun deleteOldest(overflow: Long) {
         firestore.collection("recent")
             .whereEqualTo("user_id", currentUser!!.uid)
-            .orderBy("Timestamp", Query.Direction.ASCENDING)
+            .orderBy("timestamp", Query.Direction.ASCENDING)
             .limit(overflow)
             .get()
             .addOnSuccessListener { it ->
-                it.documents.forEach {
-                        mapEntry -> {
-                            val id = mapEntry.id
-                            firestore.collection("recent").document(id).delete()
-                        }
-                    }
+                it.documents.forEach { mapEntry ->
+                    val id = mapEntry.id
+                    firestore.collection("recent").document(id).delete()
+                }
             }
     }
 
