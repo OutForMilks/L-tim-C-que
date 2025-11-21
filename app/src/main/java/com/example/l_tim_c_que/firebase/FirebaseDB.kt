@@ -83,30 +83,38 @@ object FirebaseDB {
         }
 
         // check if already in recently viewed
-        isInBookmarks(meal.id) { it ->
-            if (it)
-                return@isInBookmarks
-            val count = firestore.collection("recent").count().get(AggregateSource.SERVER).result.count
-            // check if recent is equal to 4, delete excess if yes
-            if(count >= 4) {
-                val overflow = count - 3
-                deleteOldest(overflow)
+        isInRecent(meal.id) { it ->
+            if (it){
+                Log.d(TAG, "Already in recently viewed")
+                return@isInRecent
             }
-
-            val recent = FirebaseModels.Recent(
-                currentUser!!.uid,meal.id, meal, Timestamp(Date())
-            )
-
             firestore.collection("recent")
-                .add(recent)
-                .addOnSuccessListener { documentReference ->
-                    Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                    onComplete.invoke(true)
+                .whereEqualTo("user_id", currentUser!!.uid)
+                .count().get(AggregateSource.SERVER).addOnSuccessListener { it ->
+                // check if recent is equal to 4, delete excess if yes
+                if(it.count >= 4) {
+                    val overflow = it.count - 3
+                    deleteOldest(overflow)
                 }
-                .addOnFailureListener { e ->
-                    Log.w(TAG, "Error adding document", e)
-                    onComplete.invoke(false)
-                }
+
+                val recent = FirebaseModels.Recent(
+                    currentUser!!.uid,meal.id, meal, Timestamp(Date())
+                )
+
+                firestore.collection("recent")
+                    .add(recent)
+                    .addOnSuccessListener { documentReference ->
+                        Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                        onComplete.invoke(true)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w(TAG, "Error adding document", e)
+                        onComplete.invoke(false)
+                    }
+            }.addOnFailureListener { e ->
+                Log.w(TAG, "Error getting count aggregate", e)
+                onComplete.invoke(false)
+            }
         }
     }
 
@@ -143,18 +151,33 @@ object FirebaseDB {
                 callback(false)
             }
     }
+
+    fun isInRecent(id: String, callback: (Boolean) -> Unit) {
+        firestore.collection("recent")
+            .whereEqualTo("meal_id", id)
+            .whereEqualTo("user_id", currentUser?.uid)
+            .get()
+            .addOnSuccessListener { result ->
+                callback(!result.isEmpty)
+            }
+            .addOnFailureListener {
+                callback(false)
+            }
+    }
+
     fun deleteOldest(overflow: Long) {
         firestore.collection("recent")
+            .whereEqualTo("user_id", currentUser!!.uid)
             .orderBy("Timestamp", Query.Direction.ASCENDING)
-            .limit(1)
+            .limit(overflow)
             .get()
-            .result
-            .documents
-            .forEach {
-                mapEntry -> {
-                    val id = mapEntry.id
-                    firestore.collection("recent").document(id).delete()
-                }
+            .addOnSuccessListener { it ->
+                it.documents.forEach {
+                        mapEntry -> {
+                            val id = mapEntry.id
+                            firestore.collection("recent").document(id).delete()
+                        }
+                    }
             }
     }
 
