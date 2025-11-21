@@ -21,6 +21,7 @@ import com.google.firebase.firestore.persistentCacheSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.Date
 
 /**
@@ -69,38 +70,37 @@ object FirebaseDB {
 
     /**
      * Returns all bookmarked meals tied to a user
-     * @param onComplete callback with list of MealDetail
+     * @return list of Meal
      */
-    fun getAllBookmarks(onComplete: (List<APIModel.MealDetail>) -> Unit) {
-        firestore.collection("bookmarks")
+    suspend fun getAllBookmarks(): List<APIModel.Meal> {
+        return try {
+            val snapshot = firestore.collection("bookmarks")
             .whereEqualTo("user_id", currentUser?.uid)
             .get()
-            .addOnSuccessListener { result ->
-                val list = mutableListOf<APIModel.MealDetail>()
-                result.forEach{ a -> list.add(a.toObject(FirebaseModels.Bookmark::class.java).recipe)}
-                onComplete(list)
-            }
-            .addOnFailureListener {
-                onComplete(emptyList())
-            }
+            .await()
+            snapshot.mapNotNull { it.toObject(FirebaseModels.Recent::class.java).recipe.toMeal() }
+        } catch (e: Exception) {
+            Log.w(TAG, "Fetch list of recently viewed failed", e)
+            emptyList()
+        }
     }
 
     /**
      * Returns all recently viewed meals tied to a user
-     * @param onComplete callback with list of MealDetail
+     * @return list of MealDetail
      */
-    fun getAllRecent(onComplete: (List<APIModel.MealDetail>) -> Unit) {
-        firestore.collection("recent")
-            .whereEqualTo("user_id", currentUser?.uid)
-            .get()
-            .addOnSuccessListener { result ->
-                val list = mutableListOf<APIModel.MealDetail>()
-                result.forEach{ a -> list.add(a.toObject(FirebaseModels.Recent::class.java).recipe)}
-                onComplete(list)
-            }
-            .addOnFailureListener {
-                onComplete(emptyList())
-            }
+    suspend fun getAllRecent(): List<APIModel.Meal> {
+        return try {
+            val snapshot = firestore.collection("recent")
+                .whereEqualTo("user_id", currentUser?.uid)
+                .get()
+                .await()
+
+            snapshot.mapNotNull { it.toObject(FirebaseModels.Recent::class.java).recipe.toMeal() }
+        } catch (e: Exception) {
+            Log.w(TAG, "Fetch list of recently viewed failed", e)
+            emptyList()
+        }
     }
 
     /**
