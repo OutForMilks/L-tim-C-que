@@ -20,6 +20,7 @@ import android.widget.TextView
 import android.widget.Button
 import com.bumptech.glide.Glide
 import com.example.l_tim_c_que.api.APIModel
+import com.example.l_tim_c_que.firebase.FirebaseDB
 
 
 /**
@@ -67,11 +68,12 @@ private fun DetailFragment.setupObservers(view: View) {
     val banner = view.findViewById<ImageView>(R.id.recipe_banner)
     val title = view.findViewById<TextView>(R.id.recipe_title)
     val country = view.findViewById<TextView>(R.id.recipe_country)
-    // val bookmark = view.findViewById<Button>(R.id.bookmark_button) // Unused currently
+    val bookmark = view.findViewById<Button>(R.id.bookmark_button) // Unused currently
     val ingredients = view.findViewById<TextView>(R.id.recipe_ingredients_list)
     val instructions = view.findViewById<TextView>(R.id.recipe_instructions)
     val loadBar = view.findViewById<View>(R.id.progressBarDetail)
     val scrollView = view.findViewById<View>(R.id.content_scroll_view)
+    var currentMealDetail: APIModel.MealDetail? = null
 
     detailViewModel.detailID.observe(viewLifecycleOwner) { id ->
         mealDetailViewModel.searchMealById(id)
@@ -83,12 +85,18 @@ private fun DetailFragment.setupObservers(view: View) {
 
     mealDetailViewModel.mealDetail.observe(viewLifecycleOwner) { mealDetail ->
         mealDetail?.let {
+            currentMealDetail = it
             banner.updateImage(it.imageUrl)
             title.updateText(it.name)
             country.updateText(" ${it.area}")
             ingredients.updateIngredients(it)
             instructions.updateInstructions(it)
+            bookmark.bookmarkStatus(it.id)
         }
+    }
+
+    bookmark.setOnClickListener {
+        currentMealDetail?.let { it -> bookmark.updateBookmark(it)}
     }
 }
 
@@ -118,7 +126,37 @@ private fun ImageView.updateImage(url: String?) {
 private fun TextView.updateText(text: String?) {
     this.text = text
 }
+/**
+ * Sets Button with the provided meal's bookmark status.
+ * @param meal The id of the meal.
+ */
+private fun Button.bookmarkStatus(meal: String) {
+    FirebaseDB.isInBookmarks(meal) { bool ->
+        this.isSelected = bool
+        editButtonContents(this)
+    }
+}
 
+private fun editButtonContents(btn: Button) {
+    btn.text = if (btn.isSelected) "Bookmarked" else "Bookmark"
+}
+
+/**
+ * Updates bookmarked status of the provided meal.
+ * @param meal The meal of type MealDetail.
+ */
+private fun Button.updateBookmark(meal: APIModel.MealDetail) {
+    FirebaseDB.isInBookmarks(meal.id) { bool ->
+        if (bool) FirebaseDB.removeBookmark(meal) { it ->
+            this.isSelected = !it
+            editButtonContents(this)
+        }
+        else FirebaseDB.saveBookmark(meal) { it ->
+            this.isSelected = it
+            editButtonContents(this)
+        }
+    }
+}
 /**
  * Formats and displays the list of ingredients and measures.
  * @param mealDetail The meal detail object containing ingredients and measures.
@@ -145,3 +183,4 @@ private fun TextView.updateInstructions(mealDetail: APIModel.MealDetail) {
         ?.joinToString("\n\n")
     this.text = instructionList
 }
+
