@@ -179,6 +179,63 @@ object FirebaseDB {
     }
 
     /**
+     * Updates a meal (if there is any difference between the DB and API) in the user's bookmarked list
+     * @param meal the MealDetail to be updated
+     * @param onComplete callback function
+     */
+    fun updateBookmark(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit) {
+        if (currentUser == null) {
+            Log.w(TAG, "No current user. Cannot update bookmark.")
+            onComplete(false)
+            return
+        }
+
+        firestore.collection("bookmarks")
+            .whereEqualTo("meal_id", meal.id)
+            .whereEqualTo("user_id", currentUser?.uid)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val document = snapshot.documents.firstOrNull()
+
+                if (document == null) {
+                    Log.w(TAG, "Bookmark not found, cannot update.")
+                    onComplete(false)
+                    return@addOnSuccessListener
+                }
+
+                val existing = document.toObject(FirebaseModels.Bookmark::class.java)
+
+                if (existing == null) {
+                    onComplete(false)
+                    return@addOnSuccessListener
+                }
+
+                if (existing.recipe == meal) {
+                    Log.d(TAG, "No changes detected. Update skipped.")
+                    onComplete(true)
+                    return@addOnSuccessListener
+                }
+
+                firestore.collection("bookmarks")
+                    .document(document.id)
+                    .update("recipe", meal)
+                    .addOnSuccessListener {
+                        Log.d(TAG, "Bookmark updated successfully.")
+                        onComplete(true)
+                    }
+                    .addOnFailureListener {
+                        Log.w(TAG, "Failed to update bookmark.", it)
+                        onComplete(false)
+                    }
+            }
+            .addOnFailureListener {
+                Log.w(TAG, "Error finding bookmark for update.", it)
+                onComplete(false)
+            }
+    }
+
+
+    /**
      * Saves a meal to the user's recently viewed list.
      * Also removes the oldest items if number of items
      * in list is greater than 4
