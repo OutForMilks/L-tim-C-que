@@ -27,6 +27,8 @@ import com.example.l_tim_c_que.api.APIModel
 import com.example.l_tim_c_que.firebase.FirebaseDB
 import androidx.core.content.ContextCompat;
 import com.example.l_tim_c_que.firebase.NetworkChecker
+import com.example.l_tim_c_que.viewmodel.RecentViewModel
+import com.example.l_tim_c_que.viewmodel.RecentViewModelFactory
 
 
 /**
@@ -37,6 +39,9 @@ class DetailFragment : Fragment() {
 
     internal val bookmarkViewModel: BookmarkViewModel by activityViewModels {
         BookmarkViewModelFactory(MealRepository(APIClient.api))
+    }
+    internal val recentViewModel: RecentViewModel by activityViewModels {
+        RecentViewModelFactory(MealRepository(APIClient.api))
     }
 
     internal val mealDetailViewModel: MealDetailViewModel by activityViewModels {
@@ -89,10 +94,15 @@ private fun DetailFragment.setupObservers(view: View) {
         if(NetworkChecker.status.value)
             mealDetailViewModel.searchMealById(id)
         else{
-            bookmarkViewModel.getBookmarkDetail(id)
+            bookmarkViewModel.isBookmarked(id).observe(viewLifecycleOwner) { isBookmarked ->
+                if (isBookmarked) {
+                    bookmarkViewModel.getBookmarkDetail(id)
+                } else {
+                    recentViewModel.getRecentDetail(id)
+                }
+            }
         }
     }
-
 
     if(NetworkChecker.status.value) {
         mealDetailViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->

@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.memoryCacheSettings
@@ -109,11 +110,12 @@ object FirebaseDB {
      * @return MealDetail referring to that id, or null
      */
     suspend fun getSpecificBookmark(id: String): APIModel.MealDetail? {
+        val source = if (NetworkChecker.status.value) Source.DEFAULT else Source.CACHE
         return try {
             val snapshot = firestore.collection("bookmarks")
                 .whereEqualTo("user_id", currentUser?.uid)
                 .whereEqualTo("meal_id", id)
-                .get()
+                .get(source)
                 .await()
 
             snapshot.first().toObject(FirebaseModels.Bookmark::class.java).recipe
@@ -130,11 +132,12 @@ object FirebaseDB {
      * @return MealDetail referring to that id, or null
      */
     suspend fun getSpecificRecent(id: String): APIModel.MealDetail? {
+        val source = if (NetworkChecker.status.value) Source.DEFAULT else Source.CACHE
         return try {
             val snapshot = firestore.collection("recent")
                 .whereEqualTo("user_id", currentUser?.uid)
                 .whereEqualTo("meal_id", id)
-                .get()
+                .get(source)
                 .await()
 
             snapshot.first().toObject(FirebaseModels.Recent::class.java).recipe
@@ -319,10 +322,11 @@ object FirebaseDB {
      * @param callback contains boolean for status
      */
     fun isInBookmarks(id: String, callback: (Boolean) -> Unit) {
+        val source = if (NetworkChecker.status.value) Source.DEFAULT else Source.CACHE
         firestore.collection("bookmarks")
             .whereEqualTo("meal_id", id)
             .whereEqualTo("user_id", currentUser?.uid)
-            .get()
+            .get(source)
             .addOnSuccessListener { result ->
                 callback(!result.isEmpty)
             }
@@ -374,7 +378,6 @@ object FirebaseDB {
                 }
             }
     }
-
     /**
      * Initializes Firebase and calls signIn(). Also runs a coroutine to check for network changes.
      * @param context the context this was called in
