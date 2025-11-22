@@ -44,7 +44,12 @@
     <fragment
         android:id="@+id/bookmarkFragment"
         android:name="com.example.l_tim_c_que.ui.bookmark.BookmarkFragment"
-        android:label="Bookmark" />
+        android:label="Bookmark" >
+        <action
+            android:id="@+id/action_bookmark_to_detail"
+            app:destination="@id/detailFragment">
+        </action>
+    </fragment>
 
     <fragment
         android:id="@+id/detailFragment"
