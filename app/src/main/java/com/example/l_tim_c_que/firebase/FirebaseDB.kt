@@ -70,15 +70,15 @@ object FirebaseDB {
 
     /**
      * Returns all bookmarked meals tied to a user
-     * @return list of Meal
+     * @return list of MealDetail
      */
-    suspend fun getAllBookmarks(): List<APIModel.Meal> {
+    suspend fun getAllBookmarks(): List<APIModel.MealDetail> {
         return try {
             val snapshot = firestore.collection("bookmarks")
             .whereEqualTo("user_id", currentUser?.uid)
             .get()
             .await()
-            snapshot.mapNotNull { it.toObject(FirebaseModels.Recent::class.java).recipe.toMeal() }
+            snapshot.mapNotNull { it.toObject(FirebaseModels.Recent::class.java).recipe }
         } catch (e: Exception) {
             Log.w(TAG, "Fetch list of recently viewed failed", e)
             emptyList()
@@ -89,14 +89,14 @@ object FirebaseDB {
      * Returns all recently viewed meals tied to a user
      * @return list of MealDetail
      */
-    suspend fun getAllRecent(): List<APIModel.Meal> {
+    suspend fun getAllRecent(): List<APIModel.MealDetail> {
         return try {
             val snapshot = firestore.collection("recent")
                 .whereEqualTo("user_id", currentUser?.uid)
                 .get()
                 .await()
 
-            snapshot.mapNotNull { it.toObject(FirebaseModels.Recent::class.java).recipe.toMeal() }
+            snapshot.mapNotNull { it.toObject(FirebaseModels.Recent::class.java).recipe }
         } catch (e: Exception) {
             Log.w(TAG, "Fetch list of recently viewed failed", e)
             emptyList()
@@ -352,6 +352,7 @@ object FirebaseDB {
 
     /**
      * Deletes the oldest meals from the user list of recently viewed.
+     * Uses a composite index in Firestore.
      * @param overflow the number of items to delete
      */
     fun deleteOldest(overflow: Long) {

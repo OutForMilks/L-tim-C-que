@@ -75,18 +75,18 @@ class MealRepository(
     /**
      * Fetches user's list of bookmarked recipes, based on [FirebaseDB.currentUser]
      *
-     * @return A [APIModel.MealDetail] object if found, or null otherwise.
+     * @return A list of [APIModel.MealDetail] objects, or an empty list if no matches are found.
      */
-    suspend fun getBookmarkList(): List<APIModel.Meal> {
+    suspend fun getBookmarkList(): List<APIModel.MealDetail> {
         return FirebaseDB.getAllBookmarks()
     }
 
     /**
      * Fetches the user's list of recently viewed (limited to 4), based on [FirebaseDB.currentUser]
      *
-     * @return A list of [APIModel.Meal] objects, or an empty list if no matches are found.
+     * @return A list of [APIModel.MealDetail] objects, or an empty list if no matches are found.
      */
-    suspend fun getRecentlyViewedList(): List<APIModel.Meal> {
+    suspend fun getRecentlyViewedList(): List<APIModel.MealDetail> {
         return FirebaseDB.getAllRecent()
     }
 
