@@ -5,7 +5,7 @@ Letim Coque is a reciper finder application designed to help users find and mana
 
 The app also supports local storage for saving bookmarked recipes and tracking recently viewed recipes. This allows for offline access to these items to enhance user experience.
 
-It primarily relies on **TheMealDBAPI**, which serves as the source for live recipe data, and **SQLite**, which is used to store user-specific-data locally.
+It primarily relies on **TheMealDB API**, which serves as the source for live recipe data, and **SQLite**, which is used to store user-specific-data locally.
 
 ## Group Members
 * **Borja, Stephen**
