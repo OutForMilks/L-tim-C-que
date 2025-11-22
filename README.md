@@ -28,7 +28,7 @@ It primarily relies on **TheMealDB API**, which serves as the source for live re
     * RecyclerView for listing recipes.
     * Fragments for navigation (Home, Search, Random, Bookmark).
 
-## Installation
+## Installation and Setup
 1.  Clone the repository:
     ```bash
     git clone (https://github.com/OutForMilks/L-tim-C-que)
