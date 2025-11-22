@@ -4,18 +4,14 @@ import com.example.l_tim_c_que.api.APIService
 import com.example.l_tim_c_que.api.APIModel
 import com.example.l_tim_c_que.firebase.FirebaseDB
 
-/* TODO: Add firebase manager
-         Implement Error messages
- */
 /**
  * Repository class that acts as a single source of truth for meal data.
- * It abstracts the data sources (API, and potentially Firebase/Database in the future) from the rest of the app.
+ * It abstracts the data sources from the rest of the app.
  *
  * @property apiService The Retrofit service used to fetch data from the network.
  */
 class MealRepository(
     private val apiService: APIService
-    // Add firebase manager
 )
 {
     /**
@@ -102,6 +98,43 @@ class MealRepository(
     }
 
     /**
+    * Saves a meal to the user's bookmarked list
+    * @param meal the MealDetail to be saved
+    * @param onComplete callback function with boolean for status
+    */
+    fun saveBookmark(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit) {
+        FirebaseDB.saveBookmark(meal, onComplete)
+    }
+
+    /**
+     * Saves a meal to the user's recently viewed list.
+     * @param meal the MealDetail to be saved
+     * @param onComplete callback function with boolean for status
+     */
+    fun updateBookmark(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit) {
+        FirebaseDB.updateBookmark(meal, onComplete)
+    }
+
+
+    /**
+     * Removes a bookmark from the user's list of bookmarks
+     * @param meal the MealDetail to remove
+     * @param onComplete callback function with boolean for status
+     */
+    fun removeBookmark(meal: APIModel.MealDetail, onComplete: (Boolean) -> Unit) {
+        FirebaseDB.removeBookmark(meal, onComplete)
+    }
+
+    /**
+     * Checks if meal id is in user's list of bookmarks
+     * @param id meal id to check
+     * @param callback contains boolean for status
+     */
+    fun isMealBookmarked(id: String, callback: (Boolean) -> Unit) {
+        FirebaseDB.isInBookmarks(id, callback)
+    }
+
+    /**
      * Fetches a specific meal from the user's list of
      * recently viewed, based on [FirebaseDB.currentUser]
      *
@@ -111,4 +144,6 @@ class MealRepository(
     suspend fun getMealFromRecent(id: String): APIModel.MealDetail? {
         return FirebaseDB.getSpecificRecent(id)
     }
+
+
 }

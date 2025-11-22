@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.l_tim_c_que.repository.MealRepository
 
 /**
- * Factory for creating a [MealViewModel] with a constructor that takes a [MealRepository].
+ * Factory for creating a [RandomViewModel] with a constructor that takes a [MealRepository].
  *
  * @param repository The repository for meal data.
  */
@@ -21,12 +21,12 @@ class RandomViewModelFactory (
      * @throws IllegalArgumentException if the given `modelClass` is not a [RandomViewModel].
      */
     override fun <T: ViewModel> create(modelClass: Class<T>): T {
-        // Check if the requested ViewModel class is assignable from MealViewModel
+        // Check if the requested ViewModel class is assignable from RandomViewModel
         if(modelClass.isAssignableFrom(RandomViewModel::class.java)) {
-            // If it is, create an instance of MealViewModel, passing the repository.
+            // If it is, create an instance of RandomViewModel, passing the repository.
             return RandomViewModel(repository) as T //its safe since there is an if statement to check
         }
-        // If the requested ViewModel is not MealViewModel, throw an exception.
+        // If the requested ViewModel is not RandomViewModel, throw an exception.
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

@@ -32,7 +32,6 @@ class MealAdapter(
         private val mealImage: ImageView = itemView.findViewById(R.id.recipe_banner)
         private val mealName: TextView = itemView.findViewById(R.id.recipe_title)
 
-        private val recipieBookmark: ImageButton = itemView.findViewById(R.id.recipie_bookmark)
         private var currentMeal: APIModel.Meal? = null
 
         /**
@@ -47,9 +46,6 @@ class MealAdapter(
             Glide.with(mealImage.context).load(meal.imageUrl).into(mealImage)
 
             itemView.setOnClickListener {
-                onClick(meal)
-            }
-            recipieBookmark.setOnClickListener {
                 onClick(meal)
             }
 

@@ -27,6 +27,7 @@ import com.example.l_tim_c_que.viewmodel.DetailViewModel
 import com.example.l_tim_c_que.viewmodel.MealViewModel
 import com.example.l_tim_c_que.viewmodel.MealViewModelFactory
 import com.example.l_tim_c_que.viewmodel.SearchViewModel
+import android.widget.ImageView
 import com.google.android.material.button.MaterialButton
 
 /**
@@ -118,7 +119,10 @@ private fun SearchFragment.setupObservers(view: View) {
     val emptyState = view.findViewById<View>(R.id.empty_state)
     val etSearch = view.findViewById<EditText>(R.id.searchbar_text)
 
+    val emptyImage = view.findViewById<ImageView>(R.id.empty_state_icon)
     val emptyText = view.findViewById<TextView>(R.id.empty_state_text)
+
+    emptyImage.setImageResource(R.drawable.search_icon)
 
     mealViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
         if (isLoading) {
