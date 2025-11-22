@@ -78,7 +78,7 @@ object FirebaseDB {
             .whereEqualTo("user_id", currentUser?.uid)
             .get()
             .await()
-            snapshot.mapNotNull { it.toObject(FirebaseModels.Recent::class.java).recipe }
+            snapshot.mapNotNull { it.toObject(FirebaseModels.Bookmark::class.java).recipe }
         } catch (e: Exception) {
             Log.w(TAG, "Fetch list of recently viewed failed", e)
             emptyList()
