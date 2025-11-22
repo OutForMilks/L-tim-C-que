@@ -116,7 +116,7 @@ object FirebaseDB {
                 .get()
                 .await()
 
-            snapshot.first().toObject(FirebaseModels.Recent::class.java).recipe
+            snapshot.first().toObject(FirebaseModels.Bookmark::class.java).recipe
         } catch (e: Exception) {
             Log.w(TAG, "Fetch list of recently viewed failed", e)
 
