@@ -343,9 +343,15 @@ object FirebaseDB {
             .whereEqualTo("user_id", currentUser?.uid)
             .get()
             .addOnSuccessListener { result ->
-                callback(!result.isEmpty)
+                val check = !result.isEmpty
+                if(check)
+                    firestore.collection("recent")
+                        .document(result.documents.first().id)
+                        .update("timestamp", Timestamp(Date()))
+                callback(check)
             }
             .addOnFailureListener {
+                Log.w(TAG, "Check for recipe in recently viewed failed.")
                 callback(false)
             }
     }
