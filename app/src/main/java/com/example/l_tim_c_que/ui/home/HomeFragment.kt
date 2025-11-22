@@ -9,13 +9,25 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import com.example.l_tim_c_que.R
+import com.example.l_tim_c_que.api.APIClient
+import com.example.l_tim_c_que.repository.MealRepository
+import com.example.l_tim_c_que.ui.adapter.MealDetailAdapter
+import com.example.l_tim_c_que.util.GridSpacingItemDecoration
+import com.example.l_tim_c_que.viewmodel.DetailViewModel
+import com.example.l_tim_c_que.viewmodel.MealViewModel
+import com.example.l_tim_c_que.viewmodel.RecentViewModel
+import com.example.l_tim_c_que.viewmodel.RecentViewModelFactory
 import com.example.l_tim_c_que.viewmodel.SearchViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
@@ -27,6 +39,14 @@ import com.google.android.material.button.MaterialButton
 class HomeFragment : Fragment() {
 
     internal val searchViewModel: SearchViewModel by activityViewModels()
+    internal val recentViewModel: RecentViewModel by activityViewModels {
+        RecentViewModelFactory(MealRepository(APIClient.api))
+    }
+    internal val mealViewModel: MealViewModel by activityViewModels()
+    internal val detailViewModel: DetailViewModel by activityViewModels()
+    internal val adapter = MealDetailAdapter { clickedMeal ->
+        navigateToDetails(clickedMeal.id)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,8 +60,17 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupHeader(view)
+        setupRecyclerView(view)
+        setupObservers(view)
         setupSearchBar(view)
         setupFilterButtons(view)
+
+        recentViewModel.loadRecent()
+    }
+
+    private fun navigateToDetails(mealId: String) {
+        detailViewModel.setDetailID(mealId)
+        findNavController().navigate(R.id.action_home_to_detail)
     }
 }
 
@@ -160,3 +189,67 @@ private fun HomeFragment.setupFilterSelection(view: View) {
         }
     }
 }
+
+
+/**
+ * Sets up the RecyclerView for displaying meal results.
+ * Configures the GridLayoutManager and adds item decoration for spacing.
+ *
+ * @param view The root view of the fragment.
+ */
+private fun HomeFragment.setupRecyclerView(view: View) {
+    val recycleView = view.findViewById<RecyclerView>(R.id.recipie_widget_list)
+    recycleView.adapter = adapter
+    recycleView.layoutManager = GridLayoutManager(requireContext(), 2)
+    val spacingInPixels = (22 * resources.displayMetrics.density).toInt()
+    recycleView.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, false))
+}
+
+/**
+ * Sets up observers for the ViewModels.
+ * Observes loading state, meal list, and search queries to update the UI accordingly.
+ *
+ * @param view The root view of the fragment.
+ */
+private fun HomeFragment.setupObservers(view: View) {
+    val loadBar = view.findViewById<View>(R.id.progressBar)
+    val recycleView = view.findViewById<RecyclerView>(R.id.recipie_widget_list)
+    val emptyState = view.findViewById<View>(R.id.empty_state)
+    val etSearch = view.findViewById<EditText>(R.id.searchbar_text)
+
+    val emptyImage = view.findViewById<ImageView>(R.id.empty_state_icon)
+    val emptyText = view.findViewById<TextView>(R.id.empty_state_text)
+
+    emptyImage.setImageResource(R.drawable.search_icon)
+
+    recentViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+        if (isLoading) {
+            emptyState.visibility = View.GONE
+            loadBar.visibility = View.VISIBLE
+
+            recycleView.visibility = View.GONE
+        } else {
+            loadBar.visibility = View.GONE
+            recycleView.visibility = View.VISIBLE
+        }
+    }
+
+    recentViewModel.mealDetailsList.observe(viewLifecycleOwner) { meals ->
+        adapter.submitList(meals)
+        emptyState.visibility = if (meals.isEmpty()) View.VISIBLE else View.GONE
+        emptyText.text = "No results found."
+    }
+
+    searchViewModel.searchQuery.observe(viewLifecycleOwner) { query ->
+        if (etSearch.text.toString() != query) {
+            etSearch.setText(query)
+        }
+        when (searchViewModel.filter.value) {
+            "name" -> mealViewModel.searchMealByName(query)
+            "origin" -> mealViewModel.searchMealByArea(query)
+            "ingredient" -> mealViewModel.searchMealByIngredient(query)
+            null -> mealViewModel.searchMealByName(query)
+        }
+    }
+}
+
