@@ -19,9 +19,9 @@ import com.example.l_tim_c_que.api.APIModel
  *
  * @property onClick Callback function to be invoked when a meal item is clicked.
  */
-class MealAdapter(
-    private val onClick: (APIModel.Meal) -> Unit
-) : ListAdapter<APIModel.Meal, MealAdapter.MealViewHolder>(MealDiffCallback()) {
+class MealDetailAdapter(
+    private val onClick: (APIModel.MealDetail) -> Unit
+) : ListAdapter<APIModel.MealDetail?, MealDetailAdapter.MealViewHolder>(MealDetailDiffCallback()) {
 
     /**
      * ViewHolder class to hold references to the views for each meal item.
@@ -32,18 +32,16 @@ class MealAdapter(
         private val mealImage: ImageView = itemView.findViewById(R.id.recipe_banner)
         private val mealName: TextView = itemView.findViewById(R.id.recipe_title)
 
-        private var currentMeal: APIModel.Meal? = null
-
         /**
          * Binds the meal data to the views.
          *
          * @param meal The meal object to display.
          */
-        fun bind(meal : APIModel.Meal)
+        fun bind(meal : APIModel.MealDetail)
         {
-            currentMeal = meal
-            mealName.text = meal.name
-            Glide.with(mealImage.context).load(meal.imageUrl).into(mealImage)
+            val currentMeal = meal.toMeal()
+            mealName.text = currentMeal.name
+            Glide.with(mealImage.context).load(currentMeal.imageUrl).into(mealImage)
 
             itemView.setOnClickListener {
                 onClick(meal)
@@ -60,7 +58,7 @@ class MealAdapter(
 
     override fun onBindViewHolder(holder: MealViewHolder, position: Int) {
         val meal = getItem(position)
-        holder.bind(meal)
+        holder.bind(meal!!)
     }
 
 
@@ -70,10 +68,10 @@ class MealAdapter(
  * DiffCallback for calculating the difference between two non-null items in a list.
  * Used by [ListAdapter] to determine which items have changed.
  */
-class MealDiffCallback : DiffUtil.ItemCallback<APIModel.Meal>() {
-    override fun areItemsTheSame(oldItem: APIModel.Meal, newItem: APIModel.Meal) =
+class MealDetailDiffCallback : DiffUtil.ItemCallback<APIModel.MealDetail?>() {
+    override fun areItemsTheSame(oldItem: APIModel.MealDetail, newItem: APIModel.MealDetail) =
         oldItem.id == newItem.id
 
-    override fun areContentsTheSame(oldItem: APIModel.Meal, newItem: APIModel.Meal) =
+    override fun areContentsTheSame(oldItem: APIModel.MealDetail, newItem: APIModel.MealDetail) =
         oldItem == newItem
 }

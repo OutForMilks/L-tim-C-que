@@ -27,6 +27,7 @@ import com.example.l_tim_c_que.viewmodel.DetailViewModel
 import com.example.l_tim_c_que.viewmodel.MealViewModel
 import com.example.l_tim_c_que.viewmodel.MealViewModelFactory
 import com.example.l_tim_c_que.viewmodel.SearchViewModel
+import android.widget.ImageView
 import com.google.android.material.button.MaterialButton
 
 /**
@@ -80,9 +81,15 @@ class SearchFragment : Fragment() {
 private fun SearchFragment.setupHeader(view: View) {
     val title = view.findViewById<TextView>(R.id.tvTitle)
     val search = view.findViewById<View>(R.id.search_bar)
+    val emptyState = view.findViewById<View>(R.id.empty_state)
     
     title.visibility = View.VISIBLE
     search.visibility = View.VISIBLE
+    emptyState.visibility = View.VISIBLE
+
+    val emptyStateText = view.findViewById<TextView>(R.id.empty_state_text)
+    emptyStateText.text ="You have not viewed\nany recipes."
+
     title.text = "Search Results"
 }
 
@@ -109,11 +116,19 @@ private fun SearchFragment.setupRecyclerView(view: View) {
 private fun SearchFragment.setupObservers(view: View) {
     val loadBar = view.findViewById<View>(R.id.progressBar)
     val recycleView = view.findViewById<RecyclerView>(R.id.recipie_widget_list)
+    val emptyState = view.findViewById<View>(R.id.empty_state)
     val etSearch = view.findViewById<EditText>(R.id.searchbar_text)
+
+    val emptyImage = view.findViewById<ImageView>(R.id.empty_state_icon)
+    val emptyText = view.findViewById<TextView>(R.id.empty_state_text)
+
+    emptyImage.setImageResource(R.drawable.search_icon)
 
     mealViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
         if (isLoading) {
+            emptyState.visibility = View.GONE
             loadBar.visibility = View.VISIBLE
+
             recycleView.visibility = View.GONE
         } else {
             loadBar.visibility = View.GONE
@@ -123,6 +138,8 @@ private fun SearchFragment.setupObservers(view: View) {
 
     mealViewModel.meals.observe(viewLifecycleOwner) { meals ->
         adapter.submitList(meals)
+        emptyState.visibility = if (meals.isEmpty()) View.VISIBLE else View.GONE
+        emptyText.text = "No results found."
     }
 
     searchViewModel.searchQuery.observe(viewLifecycleOwner) { query ->

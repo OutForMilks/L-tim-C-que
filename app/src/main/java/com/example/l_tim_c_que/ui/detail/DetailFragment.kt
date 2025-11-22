@@ -1,6 +1,10 @@
 package com.example.l_tim_c_que.ui.detail
 
+import android.content.ContentValues.TAG
+import android.graphics.Color
+import android.net.Network
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,8 +13,8 @@ import androidx.fragment.app.activityViewModels
 import com.example.l_tim_c_que.R
 import com.example.l_tim_c_que.api.APIClient
 import com.example.l_tim_c_que.repository.MealRepository
-import com.example.l_tim_c_que.viewmodel.MealViewModel
-import com.example.l_tim_c_que.viewmodel.MealViewModelFactory
+import com.example.l_tim_c_que.viewmodel.BookmarkViewModel
+import com.example.l_tim_c_que.viewmodel.BookmarkViewModelFactory
 import com.example.l_tim_c_que.viewmodel.DetailViewModel
 import com.example.l_tim_c_que.viewmodel.MealDetailViewModel
 import com.example.l_tim_c_que.viewmodel.MealDetailViewModelFactory
@@ -20,6 +24,11 @@ import android.widget.TextView
 import android.widget.Button
 import com.bumptech.glide.Glide
 import com.example.l_tim_c_que.api.APIModel
+import com.example.l_tim_c_que.firebase.FirebaseDB
+import androidx.core.content.ContextCompat;
+import com.example.l_tim_c_que.firebase.NetworkChecker
+import com.example.l_tim_c_que.viewmodel.RecentViewModel
+import com.example.l_tim_c_que.viewmodel.RecentViewModelFactory
 
 
 /**
@@ -27,6 +36,13 @@ import com.example.l_tim_c_que.api.APIModel
  * Uses ViewModels to fetch and observe meal data.
  */
 class DetailFragment : Fragment() {
+
+    internal val bookmarkViewModel: BookmarkViewModel by activityViewModels {
+        BookmarkViewModelFactory(MealRepository(APIClient.api))
+    }
+    internal val recentViewModel: RecentViewModel by activityViewModels {
+        RecentViewModelFactory(MealRepository(APIClient.api))
+    }
 
     internal val mealDetailViewModel: MealDetailViewModel by activityViewModels {
         MealDetailViewModelFactory(MealRepository(APIClient.api))
@@ -67,27 +83,87 @@ private fun DetailFragment.setupObservers(view: View) {
     val banner = view.findViewById<ImageView>(R.id.recipe_banner)
     val title = view.findViewById<TextView>(R.id.recipe_title)
     val country = view.findViewById<TextView>(R.id.recipe_country)
-    // val bookmark = view.findViewById<Button>(R.id.bookmark_button) // Unused currently
+    val bookmark = view.findViewById<Button>(R.id.bookmark_button) // Unused currently
     val ingredients = view.findViewById<TextView>(R.id.recipe_ingredients_list)
     val instructions = view.findViewById<TextView>(R.id.recipe_instructions)
     val loadBar = view.findViewById<View>(R.id.progressBarDetail)
     val scrollView = view.findViewById<View>(R.id.content_scroll_view)
+    var currentMealDetail: APIModel.MealDetail? = null
 
     detailViewModel.detailID.observe(viewLifecycleOwner) { id ->
-        mealDetailViewModel.searchMealById(id)
+        if(NetworkChecker.status.value)
+            mealDetailViewModel.searchMealById(id)
+        else{
+            bookmarkViewModel.isBookmarked(id).observe(viewLifecycleOwner) { isBookmarked ->
+                if (isBookmarked) {
+                    bookmarkViewModel.getBookmarkDetail(id)
+                } else {
+                    recentViewModel.getRecentDetail(id)
+                }
+            }
+        }
     }
 
-    mealDetailViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-        setLoadingState(isLoading, loadBar, scrollView)
+    if(NetworkChecker.status.value) {
+        mealDetailViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            setLoadingState(isLoading, loadBar, scrollView)
+        }
+
+        mealDetailViewModel.mealDetail.observe(viewLifecycleOwner) { mealDetail ->
+            mealDetail?.let {
+                currentMealDetail = it
+                bookmarkViewModel.isBookmarked(it.id).observe(viewLifecycleOwner) { isBookmarked ->
+                    bookmark.isSelected = isBookmarked
+                    editButtonContents(bookmark)
+                    editButtonBG(bookmark)
+                }
+                banner.updateImage(it.imageUrl)
+                title.updateText(it.name)
+                country.updateText(" ${it.area}")
+                ingredients.updateIngredients(it)
+                instructions.updateInstructions(it)
+
+
+                FirebaseDB.saveRecent(mealDetail) {
+                    Log.d("DetailFragment", "Saved to recently viewed")
+                }
+            }
+        }
+    }
+    else{
+        bookmarkViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            setLoadingState(isLoading, loadBar, scrollView)
+        }
+
+        bookmarkViewModel.mealDetail.observe(viewLifecycleOwner) { mealDetail ->
+            mealDetail?.let {
+                currentMealDetail = it
+                bookmarkViewModel.isBookmarked(it.id).observe(viewLifecycleOwner) { isBookmarked ->
+                    bookmark.isSelected = isBookmarked
+                    editButtonContents(bookmark)
+                    editButtonBG(bookmark)
+                }
+                banner.updateImage(it.imageUrl)
+                title.updateText(it.name)
+                country.updateText(" ${it.area}")
+                ingredients.updateIngredients(it)
+                instructions.updateInstructions(it)
+
+
+                FirebaseDB.saveRecent(mealDetail) {
+                    Log.d("DetailFragment", "Saved to recently viewed")
+                }
+            }
+        }
     }
 
-    mealDetailViewModel.mealDetail.observe(viewLifecycleOwner) { mealDetail ->
-        mealDetail?.let {
-            banner.updateImage(it.imageUrl)
-            title.updateText(it.name)
-            country.updateText(" ${it.area}")
-            ingredients.updateIngredients(it)
-            instructions.updateInstructions(it)
+    bookmark.setOnClickListener {
+        currentMealDetail?.let { it ->
+            if (bookmark.isSelected) bookmarkViewModel.removeBookmark(it)
+            else bookmarkViewModel.addBookmark(it)
+            bookmark.isSelected = !bookmark.isSelected
+            editButtonContents(bookmark)
+            editButtonBG(bookmark)
         }
     }
 }
@@ -119,6 +195,24 @@ private fun TextView.updateText(text: String?) {
     this.text = text
 }
 
+private fun editButtonContents(btn: Button) {
+    btn.text = if (btn.isSelected) "Bookmarked" else "Bookmark"
+}
+
+private fun editButtonBG(btn: Button){
+    if (btn.isSelected){
+        btn.setBackgroundColor(ContextCompat.getColor(btn.context, R.color.active_yellow))
+        btn.setTextColor(ContextCompat.getColor(btn.context, R.color.white))
+        btn.setTypeface(null, android.graphics.Typeface.BOLD)
+    }
+    else {
+        btn.setTextColor(ContextCompat.getColor(btn.context, R.color.inactive_black))
+        btn.setBackgroundColor(Color.parseColor("#E7E7E7"))
+        btn.setTypeface(null, android.graphics.Typeface.NORMAL)
+    }
+
+}
+
 /**
  * Formats and displays the list of ingredients and measures.
  * @param mealDetail The meal detail object containing ingredients and measures.
@@ -145,3 +239,4 @@ private fun TextView.updateInstructions(mealDetail: APIModel.MealDetail) {
         ?.joinToString("\n\n")
     this.text = instructionList
 }
+

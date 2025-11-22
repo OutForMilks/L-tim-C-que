@@ -3,7 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="183dp"
+    android:minHeight="150dp"
+
     android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
     android:background="@drawable/recipe_item_bg"
     android:clipChildren="false"
     android:clipToPadding="false"
@@ -25,6 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="6dp"
+        android:layout_marginBottom="10dp"
         android:fontFamily="@font/roboto"
         android:text="Chicken &amp; Mushroom Hotpot"
         android:textColor="#49454F"
@@ -32,33 +36,5 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/recipe_banner" />
-
-    <TextView
-        android:id="@+id/recipe_origin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="10dp"
-        android:alpha="0.8"
-        android:fontFamily="@font/roboto"
-        android:text="British"
-        android:textColor="#49454F"
-        android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recipe_title" />
-
-    <ImageButton
-        android:id="@+id/recipie_bookmark"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/fav_icon_bg"
-        android:elevation="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/favorite_icon" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

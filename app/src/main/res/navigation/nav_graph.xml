@@ -14,6 +14,10 @@
             android:id="@+id/action_home_to_search"
             app:destination="@id/searchFragment">
         </action>
+        <action
+            android:id="@+id/action_home_to_detail"
+            app:destination="@id/detailFragment">
+        </action>
 
     </fragment>
 
@@ -32,18 +36,28 @@
     </fragment>
 
     <fragment
-        android:id="@+id/recentFragment"
-        android:name="com.example.l_tim_c_que.ui.recent.RecentFragment"
-        android:label="Recent" />
+        android:id="@+id/randomFragment"
+        android:name="com.example.l_tim_c_que.ui.random.RandomFragment"
+        android:label="Random">
+        <action
+            android:id="@+id/action_random_to_detail"
+            app:destination="@id/detailFragment">
+        </action>
+    </fragment>
 
     <fragment
         android:id="@+id/bookmarkFragment"
         android:name="com.example.l_tim_c_que.ui.bookmark.BookmarkFragment"
-        android:label="Bookmark" />
+        android:label="Bookmark" >
+        <action
+            android:id="@+id/action_bookmark_to_detail"
+            app:destination="@id/detailFragment">
+        </action>
+    </fragment>
 
     <fragment
         android:id="@+id/detailFragment"
         android:name="com.example.l_tim_c_que.ui.detail.DetailFragment"
-        android:label="detail" />
+        android:label="Detail"/>
 
 </navigation>

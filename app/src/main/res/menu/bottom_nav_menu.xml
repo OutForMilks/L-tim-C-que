@@ -17,9 +17,9 @@
 
     <!--Recent-->
     <item
-        android:id="@+id/recentFragment"
-        android:icon="@drawable/recents_icon"
-        android:title="Recent" />
+        android:id="@+id/randomFragment"
+        android:icon="@drawable/random_icon"
+        android:title="Random" />
 
     <!--Bookmark-->
     <item
