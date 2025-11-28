@@ -98,7 +98,7 @@ private fun DetailFragment.setupObservers(view: View) {
                 if (isBookmarked) {
                     bookmarkViewModel.getBookmarkDetail(id)
                 } else {
-                    recentViewModel.getRecentDetail(id)
+                    bookmarkViewModel.getRecentDetail(id)
                 }
             }
         }

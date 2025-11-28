@@ -115,4 +115,14 @@ class BookmarkViewModel(
         }
     }
 
+    fun getRecentDetail(id: String){
+
+        viewModelScope.launch {
+            try {
+                _mealDetail.value = repository.getMealFromRecent(id)
+            } catch (e: Exception) {
+                _error.value = "Failed to load recently viewed details"
+            }
+        }
+    }
 }
