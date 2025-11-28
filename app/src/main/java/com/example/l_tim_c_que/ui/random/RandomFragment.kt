@@ -1,17 +1,21 @@
 package com.example.l_tim_c_que.ui.random
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -21,11 +25,14 @@ import com.bumptech.glide.Glide
 import com.example.l_tim_c_que.R
 import com.example.l_tim_c_que.api.APIClient
 import com.example.l_tim_c_que.api.APIModel
+import com.example.l_tim_c_que.firebase.FirebaseDB
 import com.example.l_tim_c_que.repository.MealRepository
 import com.example.l_tim_c_que.ui.adapter.MealAdapter
 import com.example.l_tim_c_que.ui.random.RandomFragment
 import com.example.l_tim_c_que.ui.random.setupObservers
 import com.example.l_tim_c_que.ui.random.setupViews
+import com.example.l_tim_c_que.viewmodel.BookmarkViewModel
+import com.example.l_tim_c_que.viewmodel.BookmarkViewModelFactory
 import com.example.l_tim_c_que.viewmodel.RandomViewModel
 import com.example.l_tim_c_que.viewmodel.RandomViewModelFactory
 import com.example.l_tim_c_que.viewmodel.MealDetailViewModel
@@ -42,6 +49,10 @@ class RandomFragment : Fragment() {
 
     internal val mealDetailViewModel: MealDetailViewModel by activityViewModels {
         MealDetailViewModelFactory(MealRepository(APIClient.api))
+    }
+
+    internal val bookmarkViewModel: BookmarkViewModel by activityViewModels {
+        BookmarkViewModelFactory(MealRepository(APIClient.api))
     }
 
     internal val randomViewModel: RandomViewModel by activityViewModels {
@@ -83,11 +94,12 @@ private fun RandomFragment.setupObservers(view: View) {
     val banner = view.findViewById<ImageView>(R.id.recipe_banner)
     val title = view.findViewById<TextView>(R.id.recipe_title)
     val country = view.findViewById<TextView>(R.id.recipe_country)
-    // val bookmark = view.findViewById<Button>(R.id.bookmark_button) // Unused currently
+    val bookmark = view.findViewById<Button>(R.id.bookmark_button) // Unused currently
     val ingredients = view.findViewById<TextView>(R.id.recipe_ingredients_list)
     val instructions = view.findViewById<TextView>(R.id.recipe_instructions)
     val loadBar = view.findViewById<View>(R.id.progressBarDetail)
     val scrollView = view.findViewById<View>(R.id.content_scroll_view)
+    var currentMealDetail: APIModel.MealDetail? = null
 
 
     randomViewModel.mealId.observe(viewLifecycleOwner) { id ->
@@ -115,11 +127,31 @@ private fun RandomFragment.setupObservers(view: View) {
 
     mealDetailViewModel.mealDetail.observe(viewLifecycleOwner) { mealDetail ->
         mealDetail?.let {
+            currentMealDetail = it
+            bookmarkViewModel.isBookmarked(it.id).observe(viewLifecycleOwner) { isBookmarked ->
+                bookmark.isSelected = isBookmarked
+                editButtonContents(bookmark)
+                editButtonBG(bookmark)
+            }
             banner.updateImage(it.imageUrl)
             title.updateText(it.name)
             country.updateText(" ${it.area}")
             ingredients.updateIngredients(it)
             instructions.updateInstructions(it)
+
+            FirebaseDB.saveRecent(mealDetail) {
+                Log.d("DetailFragment", "Saved to recently viewed")
+            }
+        }
+    }
+
+    bookmark.setOnClickListener {
+        currentMealDetail?.let { it ->
+            if (bookmark.isSelected) bookmarkViewModel.removeBookmark(it)
+            else bookmarkViewModel.addBookmark(it)
+            bookmark.isSelected = !bookmark.isSelected
+            editButtonContents(bookmark)
+            editButtonBG(bookmark)
         }
     }
 }
@@ -176,4 +208,22 @@ private fun TextView.updateInstructions(mealDetail: APIModel.MealDetail) {
         ?.filter { it.isNotBlank() }
         ?.joinToString("\n\n")
     this.text = instructionList
+}
+
+private fun editButtonContents(btn: Button) {
+    btn.text = if (btn.isSelected) "Bookmarked" else "Bookmark"
+}
+
+private fun editButtonBG(btn: Button){
+    if (btn.isSelected){
+        btn.setBackgroundColor(ContextCompat.getColor(btn.context, R.color.active_yellow))
+        btn.setTextColor(ContextCompat.getColor(btn.context, R.color.white))
+        btn.setTypeface(null, android.graphics.Typeface.BOLD)
+    }
+    else {
+        btn.setTextColor(ContextCompat.getColor(btn.context, R.color.inactive_black))
+        btn.setBackgroundColor(Color.parseColor("#E7E7E7"))
+        btn.setTypeface(null, android.graphics.Typeface.NORMAL)
+    }
+
 }
