@@ -36,14 +36,27 @@ import com.google.android.material.button.MaterialButton
  */
 class SearchFragment : Fragment() {
 
+    /**
+     * ViewModel for handling search query and filter state.
+     */
     internal val searchViewModel: SearchViewModel by activityViewModels()
 
+    /**
+     * ViewModel for sharing the selected meal ID with the DetailFragment.
+     */
     internal val detailViewModel: DetailViewModel by activityViewModels()
 
+    /**
+     * ViewModel for fetching meal data from the repository.
+     */
     internal val mealViewModel: MealViewModel by activityViewModels {
         MealViewModelFactory(MealRepository(APIClient.api))
     }
 
+    /**
+     * Adapter for the meal RecyclerView.
+     * Handles item clicks to navigate to meal details.
+     */
     internal val adapter = MealAdapter { clickedMeal ->
         navigateToDetails(clickedMeal.id)
     }
@@ -66,6 +79,11 @@ class SearchFragment : Fragment() {
         setupFilterButtons(view)
     }
 
+    /**
+     * Navigates to the details screen for the specified meal.
+     *
+     * @param mealId The ID of the meal to display details for.
+     */
     private fun navigateToDetails(mealId: String) {
         detailViewModel.setDetailID(mealId)
         findNavController().navigate(R.id.action_search_to_detail)

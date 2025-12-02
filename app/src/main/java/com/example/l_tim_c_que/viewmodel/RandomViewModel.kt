@@ -8,13 +8,20 @@ import kotlinx.coroutines.launch
 import com.example.l_tim_c_que.api.APIModel
 import com.example.l_tim_c_que.repository.MealRepository
 
-
+/**
+ * ViewModel for fetching a random meal.
+ *
+ * @param mealRepository The repository for accessing meal data.
+ */
 class RandomViewModel (
     private val mealRepository: MealRepository
 ): ViewModel() {
 
-
+    // Holds the ID of the fetched random meal.
     private val _mealId = MutableLiveData<String?>()
+    /**
+     * Exposes the random meal's ID to the UI.
+     */
     val mealId: LiveData<String?> = _mealId
 
     // Indicates whether a network operation is in progress.
@@ -33,7 +40,7 @@ class RandomViewModel (
 
     /**
      * Fetches a random meal.
-     * The result is posted to the [_meals] LiveData.
+     * The result is posted to the [_mealId] LiveData.
      */
     fun searchMealByRandom() {
         _isLoading.value = true
