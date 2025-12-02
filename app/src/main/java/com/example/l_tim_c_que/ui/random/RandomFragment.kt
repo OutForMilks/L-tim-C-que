@@ -1,6 +1,5 @@
 package com.example.l_tim_c_que.ui.random
 
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -8,29 +7,17 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.l_tim_c_que.R
 import com.example.l_tim_c_que.api.APIClient
 import com.example.l_tim_c_que.api.APIModel
 import com.example.l_tim_c_que.firebase.FirebaseDB
 import com.example.l_tim_c_que.repository.MealRepository
-import com.example.l_tim_c_que.ui.adapter.MealAdapter
-import com.example.l_tim_c_que.ui.random.RandomFragment
-import com.example.l_tim_c_que.ui.random.setupObservers
-import com.example.l_tim_c_que.ui.random.setupViews
 import com.example.l_tim_c_que.viewmodel.BookmarkViewModel
 import com.example.l_tim_c_que.viewmodel.BookmarkViewModelFactory
 import com.example.l_tim_c_que.viewmodel.RandomViewModel

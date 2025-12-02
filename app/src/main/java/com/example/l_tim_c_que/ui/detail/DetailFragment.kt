@@ -1,8 +1,6 @@
 package com.example.l_tim_c_que.ui.detail
 
-import android.content.ContentValues.TAG
 import android.graphics.Color
-import android.net.Network
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
