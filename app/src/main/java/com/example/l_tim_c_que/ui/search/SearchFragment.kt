@@ -87,7 +87,10 @@ private fun SearchFragment.setupHeader(view: View) {
     search.visibility = View.VISIBLE
     emptyState.visibility = View.VISIBLE
 
-    val emptyStateText = view.findViewById<TextView>(R.id.empty_state_text)
+    val emptyStateImage = emptyState.findViewById<ImageView>(R.id.empty_state_icon)
+    val emptyStateText = emptyState.findViewById<TextView>(R.id.empty_state_text)
+
+    emptyStateImage.setImageResource(R.drawable.eye_off_icon)
     emptyStateText.text ="You have not viewed\nany recipes."
 
     title.text = "Search Results"
@@ -119,10 +122,8 @@ private fun SearchFragment.setupObservers(view: View) {
     val emptyState = view.findViewById<View>(R.id.empty_state)
     val etSearch = view.findViewById<EditText>(R.id.searchbar_text)
 
-    val emptyImage = view.findViewById<ImageView>(R.id.empty_state_icon)
-    val emptyText = view.findViewById<TextView>(R.id.empty_state_text)
-
-    emptyImage.setImageResource(R.drawable.search_icon)
+    val emptyImage = emptyState.findViewById<ImageView>(R.id.empty_state_icon)
+    val emptyText = emptyState.findViewById<TextView>(R.id.empty_state_text)
 
     mealViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
         if (isLoading) {
@@ -139,7 +140,8 @@ private fun SearchFragment.setupObservers(view: View) {
     mealViewModel.meals.observe(viewLifecycleOwner) { meals ->
         adapter.submitList(meals)
         emptyState.visibility = if (meals.isEmpty()) View.VISIBLE else View.GONE
-        emptyText.text = "No results found."
+        emptyImage.setImageResource(R.drawable.searchbar_search_icon)
+        emptyText.text = "No results\nfound."
     }
 
     searchViewModel.searchQuery.observe(viewLifecycleOwner) { query ->
