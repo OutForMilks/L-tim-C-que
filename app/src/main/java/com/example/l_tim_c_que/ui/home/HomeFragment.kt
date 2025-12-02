@@ -31,6 +31,9 @@ import com.example.l_tim_c_que.viewmodel.RecentViewModelFactory
 import com.example.l_tim_c_que.viewmodel.SearchViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
+import com.example.l_tim_c_que.viewmodel.BookmarkViewModel
+import com.example.l_tim_c_que.viewmodel.BookmarkViewModelFactory
+
 
 /**
  * Fragment responsible for the home screen.
@@ -42,9 +45,17 @@ class HomeFragment : Fragment() {
     internal val recentViewModel: RecentViewModel by activityViewModels {
         RecentViewModelFactory(MealRepository(APIClient.api))
     }
+
+    internal val bookmarkViewModel: BookmarkViewModel by activityViewModels {
+        BookmarkViewModelFactory(MealRepository(APIClient.api))
+    }
     internal val mealViewModel: MealViewModel by activityViewModels()
     internal val detailViewModel: DetailViewModel by activityViewModels()
-    internal val adapter = MealDetailAdapter { clickedMeal ->
+    internal val recentAdapter = MealDetailAdapter { clickedMeal ->
+        navigateToDetails(clickedMeal.id)
+    }
+
+    internal val bookmarkAdapter = MealDetailAdapter { clickedMeal ->
         navigateToDetails(clickedMeal.id)
     }
 
@@ -66,6 +77,7 @@ class HomeFragment : Fragment() {
         setupFilterButtons(view)
 
         recentViewModel.loadRecent()
+        bookmarkViewModel.loadBookmarks()
     }
 
     private fun navigateToDetails(mealId: String) {
@@ -84,10 +96,34 @@ private fun HomeFragment.setupHeader(view: View) {
     val title = view.findViewById<TextView>(R.id.tvTitle)
     val search = view.findViewById<View>(R.id.search_bar)
     val header = view.findViewById<View>(R.id.header)
+    val extraRecycleView = view.findViewById<RecyclerView>(R.id.extra_recipie_widget_list)
+    val extraTitle = view.findViewById<TextView>(R.id.extraTvTitle)
 
     title.visibility = View.VISIBLE
     search.visibility = View.VISIBLE
     header.visibility = View.VISIBLE
+
+    val etSearch = search.findViewById<EditText>(R.id.searchbar_text)
+    etSearch.setText("")
+
+    val recentEmptyState = view.findViewById<View>(R.id.widget_empty_state)
+    val bookmarkEmptyState = view.findViewById<View>(R.id.extra_widget_empty_state)
+
+    val recentEmptyImage = recentEmptyState.findViewById<ImageView>(R.id.empty_state_icon)
+    val recentEmptyText = recentEmptyState.findViewById<TextView>(R.id.empty_state_text)
+
+    val bookmarkEmptyImage = bookmarkEmptyState.findViewById<ImageView>(R.id.empty_state_icon)
+    val bookmarkEmptyText = bookmarkEmptyState.findViewById<TextView>(R.id.empty_state_text)
+
+    extraRecycleView.visibility = View.VISIBLE
+    extraTitle.text = "Bookmarks"
+
+    recentEmptyText.text = "You have not viewed\nany recipes."
+    recentEmptyImage.setImageResource(R.drawable.recents_icon)
+
+    bookmarkEmptyText.text = "You have not bookmarked\nany recipes."
+    bookmarkEmptyImage.setImageResource(R.drawable.bookmark_icon)
+
 }
 
 /**
@@ -198,12 +234,18 @@ private fun HomeFragment.setupFilterSelection(view: View) {
  * @param view The root view of the fragment.
  */
 private fun HomeFragment.setupRecyclerView(view: View) {
-    val recycleView = view.findViewById<RecyclerView>(R.id.recipie_widget_list)
-    recycleView.adapter = adapter
-    recycleView.layoutManager = GridLayoutManager(requireContext(), 2)
+    val recentRecyclerView = view.findViewById<RecyclerView>(R.id.recipie_widget_list)
+    recentRecyclerView.adapter = recentAdapter
+    recentRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
     val spacingInPixels = (22 * resources.displayMetrics.density).toInt()
-    recycleView.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, false))
+    recentRecyclerView.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, false))
+
+    val bookmarkRecyclerView = view.findViewById<RecyclerView>(R.id.extra_recipie_widget_list)
+    bookmarkRecyclerView.adapter = bookmarkAdapter
+    bookmarkRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+    bookmarkRecyclerView.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, false))
 }
+
 
 /**
  * Sets up observers for the ViewModels.
@@ -214,36 +256,40 @@ private fun HomeFragment.setupRecyclerView(view: View) {
 private fun HomeFragment.setupObservers(view: View) {
     val loadBar = view.findViewById<View>(R.id.progressBar)
     val recycleView = view.findViewById<RecyclerView>(R.id.recipie_widget_list)
-    val emptyState = view.findViewById<View>(R.id.empty_state)
+    val extraRecycleView = view.findViewById<RecyclerView>(R.id.extra_recipie_widget_list)
+    val extraTitle = view.findViewById<TextView>(R.id.extraTvTitle)
     val etSearch = view.findViewById<EditText>(R.id.searchbar_text)
 
-    val emptyImage = view.findViewById<ImageView>(R.id.empty_state_icon)
-    val emptyText = view.findViewById<TextView>(R.id.empty_state_text)
-
-    emptyImage.setImageResource(R.drawable.search_icon)
+    val recentEmptyState = view.findViewById<View>(R.id.widget_empty_state)
+    val bookmarkEmptyState = view.findViewById<View>(R.id.extra_widget_empty_state)
 
     recentViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
         if (isLoading) {
-            emptyState.visibility = View.GONE
+            recentEmptyState.visibility = View.GONE
+            bookmarkEmptyState.visibility = View.GONE
             loadBar.visibility = View.VISIBLE
-
+            extraRecycleView.visibility = View.GONE
             recycleView.visibility = View.GONE
+            extraTitle.visibility = View.GONE
         } else {
             loadBar.visibility = View.GONE
+            extraRecycleView.visibility = View.VISIBLE
             recycleView.visibility = View.VISIBLE
+            extraTitle.visibility = View.VISIBLE
         }
     }
 
     recentViewModel.mealDetailsList.observe(viewLifecycleOwner) { meals ->
-        adapter.submitList(meals)
-        emptyState.visibility = if (meals.isEmpty()) View.VISIBLE else View.GONE
-        emptyText.text = "No results found."
+        recentAdapter.submitList(meals)
+        recentEmptyState.visibility = if (meals.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    bookmarkViewModel.mealDetailsList.observe(viewLifecycleOwner) { meals ->
+        bookmarkAdapter.submitList(meals)
+        bookmarkEmptyState.visibility = if (meals.isEmpty()) View.VISIBLE else View.GONE
     }
 
     searchViewModel.searchQuery.observe(viewLifecycleOwner) { query ->
-        if (etSearch.text.toString() != query) {
-            etSearch.setText(query)
-        }
         when (searchViewModel.filter.value) {
             "name" -> mealViewModel.searchMealByName(query)
             "origin" -> mealViewModel.searchMealByArea(query)
@@ -252,4 +298,3 @@ private fun HomeFragment.setupObservers(view: View) {
         }
     }
 }
-
