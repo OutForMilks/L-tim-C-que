@@ -80,7 +80,7 @@ It primarily relies on TheMealDB API, which serves as the source for live recipe
 
 - **Language**: Kotlin
 - **API**: TheMealDB API for recipe data
-- **Database**: SQLite for local storage
+- **Database**: Firebase
 - **UI Components**:
     - RecyclerView
     - Fragments
